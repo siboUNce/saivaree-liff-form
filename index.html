@@ -1,0 +1,720 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<base target="_top">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ลงทะเบียนคนไข้ - สายวรีย์ คลินิก</title>
+<style>
+  :root {
+    --accent: #a59464;
+    --accent-dark: #7d6f4c;
+    --logo-band: #a38d56;
+    --bg: #faf8f4;
+    --text: #2b2b2b;
+    --error: #c0392b;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: "Sukhumvit Set", "Noto Sans Thai", "Helvetica Neue", Arial, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.5;
+  }
+  .sr-only {
+    position: absolute;
+    width: 1px; height: 1px;
+    overflow: hidden;
+    clip: rect(0,0,0,0);
+  }
+  .hidden { display: none !important; }
+  #loading-screen {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
+    font-size: 15px;
+    color: var(--accent-dark);
+    text-align: center;
+    padding: 0 24px;
+    gap: 16px;
+  }
+  #start-btn {
+    padding: 14px 28px;
+    font-size: 15px;
+    font-weight: 600;
+    color: #fff;
+    background: var(--accent);
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+  }
+  #app { max-width: 480px; margin: 0 auto; padding: 0 16px 40px; }
+  header {
+    background: var(--logo-band);
+    text-align: center;
+    margin: 0 -16px 16px;
+    padding: 28px 16px 18px;
+    border-radius: 0 0 20px 20px;
+  }
+  header img { max-width: 200px; height: auto; display: block; margin: 0 auto; }
+  header .clinic-name {
+    margin: 10px 0 2px;
+    font-size: 15px;
+    font-weight: 600;
+    color: #fff;
+  }
+  .lang-switch {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 6px;
+    margin: 10px 0 4px;
+  }
+  .lang-btn {
+    border: 1px solid #fff;
+    background: #fff;
+    color: var(--accent-dark);
+    padding: 4px 12px;
+    font-size: 13px;
+    border-radius: 999px;
+    cursor: pointer;
+  }
+  .lang-btn.active {
+    background: var(--accent-dark);
+    color: #fff;
+    border-color: var(--accent-dark);
+  }
+  .lang-sep { color: rgba(255,255,255,0.7); }
+  #profile-box {
+    font-size: 13px;
+    color: rgba(255,255,255,0.85);
+    margin-top: 4px;
+  }
+  main { margin-top: 8px; }
+  .section {
+    background: #fff;
+    border-radius: 12px;
+    padding: 18px 16px;
+    margin-bottom: 16px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+  }
+  .section h2 {
+    font-size: 16px;
+    margin: 0 0 14px;
+    color: var(--accent-dark);
+  }
+  label {
+    display: block;
+    font-size: 14px;
+    margin-bottom: 6px;
+    font-weight: 500;
+  }
+  .req { color: var(--error); }
+  .optional { color: #999; font-weight: 400; font-size: 13px; }
+  input[type="text"],
+  input[type="date"],
+  input[type="email"],
+  input[type="tel"],
+  textarea {
+    width: 100%;
+    padding: 10px 12px;
+    font-size: 14px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    margin-bottom: 14px;
+    font-family: inherit;
+    background: #fff;
+    color: var(--text);
+  }
+  textarea { resize: vertical; min-height: 60px; }
+  input:focus, textarea:focus {
+    outline: none;
+    border-color: var(--accent);
+  }
+  .hint {
+    font-size: 12px;
+    color: #888;
+    margin-top: -10px;
+    margin-bottom: 12px;
+  }
+  .error-text {
+    font-size: 12px;
+    color: var(--error);
+    margin-top: -10px;
+    margin-bottom: 12px;
+    display: none;
+  }
+  .error-text.show { display: block; }
+  .radio-row, .choice-row {
+    display: flex;
+    gap: 18px;
+    margin-bottom: 14px;
+    flex-wrap: wrap;
+  }
+  .radio-row label, .choice-row label {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-weight: 400;
+    margin-bottom: 0;
+  }
+  .checkbox-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    margin-bottom: 16px;
+  }
+  .checkbox-row input { margin-top: 3px; }
+  .checkbox-row label { font-weight: 400; font-size: 13px; }
+  .consent-box {
+    background: var(--bg);
+    border: 1px solid #eee;
+    border-radius: 8px;
+    padding: 12px 14px;
+    font-size: 12.5px;
+    color: #555;
+    margin-bottom: 16px;
+    max-height: 260px;
+    overflow-y: auto;
+  }
+  .consent-box p { margin: 6px 0; }
+  .consent-box ul { margin: 4px 0 10px; padding-left: 18px; }
+  .consent-box li { margin-bottom: 4px; }
+  .consent-statement {
+    font-size: 13px;
+    color: var(--text);
+    font-weight: 500;
+    margin: 0 0 10px;
+    line-height: 1.5;
+  }
+  #submit-btn {
+    width: 100%;
+    padding: 14px;
+    font-size: 15px;
+    font-weight: 600;
+    color: #fff;
+    background: var(--accent);
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+  }
+  #submit-btn:disabled { opacity: 0.6; cursor: default; }
+  #status-msg {
+    text-align: center;
+    font-size: 14px;
+    margin-top: 12px;
+    padding: 10px;
+    border-radius: 8px;
+  }
+  #status-msg.success { background: #e6f4ea; color: #1e7e34; }
+  #status-msg.error { background: #fdecea; color: var(--error); }
+</style>
+</head>
+<body>
+
+<div id="loading-screen">
+  <p data-i18n="startPrompt">กดปุ่มด้านล่างเพื่อเริ่มลงทะเบียน</p>
+  <button type="button" id="start-btn" data-i18n="startBtn">เริ่มลงทะเบียน</button>
+  <span id="loading-spinner" class="hidden" data-i18n="loading">กำลังโหลดฟอร์ม...</span>
+</div>
+
+<div id="app" class="hidden">
+  <header>
+    <h1 class="sr-only" data-i18n="formTitle">แบบฟอร์มลงทะเบียนคนไข้ใหม่</h1>
+    <img src="data:image/png;base64,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" alt="สายวรีย์ คลินิก บุรีรัมย์">
+    <div class="clinic-name" data-i18n="clinicName">สายวรีย์ คลินิก บุรีรัมย์</div>
+    <div class="lang-switch">
+      <button type="button" id="btn-lang-th" class="lang-btn active">ไทย</button>
+      <span class="lang-sep">/</span>
+      <button type="button" id="btn-lang-en" class="lang-btn">EN</button>
+    </div>
+    <div id="profile-box" class="hidden"><span data-i18n="loggedInAs">เข้าสู่ระบบเป็น</span> <span id="profile-name"></span></div>
+  </header>
+
+  <main>
+    <form id="patient-form">
+
+      <div class="section">
+        <h2 data-i18n="section1">1. ข้อมูลส่วนตัว</h2>
+
+        <label><span data-i18n="firstName">ชื่อ</span> <span class="req">*</span></label>
+        <input type="text" id="firstName" required>
+
+        <label><span data-i18n="lastName">นามสกุล</span> <span class="req">*</span></label>
+        <input type="text" id="lastName" required>
+
+        <label><span data-i18n="nickname">ชื่อที่ท่านต้องการให้เรียก</span> <span class="optional" data-i18n="optional">(ไม่บังคับ)</span></label>
+        <input type="text" id="nickname">
+
+        <label><span data-i18n="idNumber">เลขบัตรประชาชน / พาสปอร์ต</span> <span class="req">*</span></label>
+        <input type="text" id="idNumber" required>
+        <div class="hint" data-i18n="idNumberHint">บัตรประชาชนไทย 13 หลัก หรือเลขพาสปอร์ตสำหรับชาวต่างชาติ</div>
+        <div class="error-text" id="err-idNumber" data-i18n="idNumberErr">กรอกเลขบัตร/พาสปอร์ตให้ถูกต้อง</div>
+
+        <label><span data-i18n="dob">วันเกิด</span> <span class="req">*</span></label>
+        <input type="date" id="dob" required>
+        <div class="hint" data-i18n="dobHint">รูปแบบวันที่: วัน/เดือน/ปี</div>
+
+        <label><span data-i18n="sex">เพศ</span> <span class="req">*</span></label>
+        <div class="radio-row">
+          <label><input type="radio" name="sex" value="ชาย" required> <span data-i18n="male">ชาย</span></label>
+          <label><input type="radio" name="sex" value="หญิง"> <span data-i18n="female">หญิง</span></label>
+        </div>
+
+        <label><span data-i18n="nationality">สัญชาติ</span> <span class="req">*</span></label>
+        <input type="text" id="nationality" required>
+
+        <label><span data-i18n="address">ที่อยู่</span> <span class="req">*</span></label>
+        <textarea id="address" required></textarea>
+
+        <label><span data-i18n="phone">เบอร์ติดต่อ</span> <span class="req">*</span></label>
+        <input type="tel" id="phone" required>
+        <div class="error-text" id="err-phone" data-i18n="phoneErr">กรอกเบอร์โทรศัพท์ให้ถูกต้อง (เช่น 0812345678)</div>
+
+        <label><span data-i18n="email">อีเมล</span> <span class="optional" data-i18n="optional">(ไม่บังคับ)</span></label>
+        <input type="email" id="email">
+      </div>
+
+      <div class="section">
+        <h2 data-i18n="section2">2. ประวัติสุขภาพ</h2>
+
+        <label><span data-i18n="chronic">โรคประจำตัว</span></label>
+        <div class="choice-row">
+          <label><input type="radio" name="chronicChoice" value="none" checked> <span data-i18n="choiceNone">ไม่มี</span></label>
+          <label><input type="radio" name="chronicChoice" value="other"> <span data-i18n="choiceOther">มี (ระบุ)</span></label>
+        </div>
+        <textarea id="chronicDiseaseDetail" class="hidden" data-i18n-ph="phChronic" placeholder="ระบุโรคประจำตัว"></textarea>
+
+        <label><span data-i18n="allergy">ประวัติแพ้ยา</span></label>
+        <div class="choice-row">
+          <label><input type="radio" name="allergyChoice" value="none" checked> <span data-i18n="choiceNone">ไม่มี</span></label>
+          <label><input type="radio" name="allergyChoice" value="other"> <span data-i18n="choiceOther">มี (ระบุ)</span></label>
+        </div>
+        <textarea id="drugAllergyDetail" class="hidden" data-i18n-ph="phAllergy" placeholder="ระบุยาที่แพ้"></textarea>
+
+        <label><span data-i18n="meds">ยาที่ทานประจำ</span></label>
+        <div class="choice-row">
+          <label><input type="radio" name="medsChoice" value="none" checked> <span data-i18n="choiceNone">ไม่มี</span></label>
+          <label><input type="radio" name="medsChoice" value="other"> <span data-i18n="choiceOther">มี (ระบุ)</span></label>
+        </div>
+        <textarea id="regularMedsDetail" class="hidden" data-i18n-ph="phMeds" placeholder="ระบุยาที่ทานประจำ"></textarea>
+      </div>
+
+      <div class="section">
+        <h2 data-i18n="section3">3. ผู้ติดต่อกรณีฉุกเฉิน</h2>
+
+        <label><span data-i18n="emergencyName">ชื่อ-นามสกุล</span> <span class="req">*</span></label>
+        <input type="text" id="emergencyName" required>
+
+        <label><span data-i18n="emergencyPhone">เบอร์ติดต่อ</span> <span class="req">*</span></label>
+        <input type="tel" id="emergencyPhone" required>
+        <div class="error-text" id="err-emergencyPhone" data-i18n="phoneErr">กรอกเบอร์โทรศัพท์ให้ถูกต้อง (เช่น 0812345678)</div>
+
+        <label><span data-i18n="emergencyRelation">ความสัมพันธ์</span> <span class="req">*</span></label>
+        <input type="text" id="emergencyRelation" required>
+      </div>
+
+      <div class="section">
+        <h2 data-i18n="section4">4. ข้อมูลเพิ่มเติม</h2>
+
+        <label><span data-i18n="referralSource">ท่านรู้จักคลินิกจากทางใด</span> <span class="optional" data-i18n="optional">(ไม่บังคับ)</span></label>
+        <input type="text" id="referralSource" data-i18n-ph="referralSourcePh" placeholder="เช่น Facebook, เพื่อนแนะนำ, Google">
+
+        <label><span data-i18n="mainReason">เหตุผลหลักที่ท่านเลือกรักษาที่คลินิกนี้</span> <span class="optional" data-i18n="optional">(ไม่บังคับ)</span></label>
+        <input type="text" id="mainReason" data-i18n-ph="mainReasonPh" placeholder="เช่น ใกล้บ้าน, รีวิวดี, หมอน่าเชื่อถือ">
+      </div>
+
+      <div class="section">
+        <h2 data-i18n="section5">5. ความยินยอมตาม PDPA</h2>
+
+        <div class="consent-box">
+          <div class="lang-block" data-lang-block="th">
+            <p><strong>วัตถุประสงค์การใช้ข้อมูลส่วนบุคคล</strong></p>
+            <p>สายวรีย์คลินิกมีความจำเป็นต้องเก็บรวบรวม ใช้ และเปิดเผยข้อมูลส่วนบุคคลของท่านเพื่อวัตถุประสงค์ต่อไปนี้:</p>
+            <ul>
+              <li>เพื่อให้บริการด้านโรคผิวหนังและความงาม การให้คำปรึกษา และการติดตามผลลัพธ์การรักษา</li>
+              <li>เพื่อประสานงานกับหน่วยงานที่เกี่ยวข้อง เช่น บริษัทประกันสุขภาพ หน่วยงานราชการ</li>
+              <li>เพื่อปรับปรุงคุณภาพบริการของคลินิก</li>
+              <li>เพื่อการปฏิบัติตามกฎหมายและข้อกำหนดของหน่วยงานภาครัฐ</li>
+            </ul>
+            <p><strong>ท่านมีสิทธิ:</strong></p>
+            <ul>
+              <li>ขอเข้าถึง แก้ไข หรือลบข้อมูลส่วนบุคคลของท่าน</li>
+              <li>ขอให้ระงับการใช้ข้อมูลบางส่วน</li>
+              <li>ถอนความยินยอมได้ทุกเมื่อโดยติดต่อฝ่ายข้อมูลส่วนบุคคลของคลินิก</li>
+            </ul>
+            <p>หมายเหตุ: ฟอร์มนี้จัดทำขึ้นเพื่อให้สอดคล้องกับพระราชบัญญัติคุ้มครองข้อมูลส่วนบุคคล (PDPA) ท่านสามารถถอนความยินยอมได้โดยติดต่อเจ้าหน้าที่คลินิก</p>
+          </div>
+          <div class="lang-block hidden" data-lang-block="en">
+            <p><strong>Purpose of use of personal data</strong></p>
+            <p>Saivaree Clinic is required to collect, use and disclose your personal data for the following purposes:</p>
+            <ul>
+              <li>To provide services in skin disease and beauty, consultation and follow-up on treatment results.</li>
+              <li>To coordinate with relevant agencies such as health insurance companies and government agencies</li>
+              <li>To improve the quality of clinic services</li>
+              <li>To comply with laws and regulations of government agencies</li>
+            </ul>
+            <p><strong>You have the right:</strong></p>
+            <ul>
+              <li>Request access, correction, or deletion of your personal data.</li>
+              <li>Request to suspend the use of some data</li>
+              <li>You may withdraw your consent at any time by contacting the clinic's personal data department.</li>
+            </ul>
+            <p>Note: This form is provided in compliance with the Personal Data Protection Act (PDPA). You may withdraw your consent by contacting the clinic staff.</p>
+          </div>
+        </div>
+
+        <p class="consent-statement" data-i18n="consentTreatmentStatement">ทางคลินิกมีความจำเป็นต้องเก็บรวบรวม ใช้ และเปิดเผยข้อมูลส่วนบุคคลของท่านเพื่อการให้บริการด้านโรคผิวหนังและความงาม รวมถึงการติดตามผลการรักษา (ทำประวัติคนไข้ และติดตามผลการรักษา)</p>
+        <div class="checkbox-row">
+          <input type="checkbox" id="consentTreatment" required>
+          <label for="consentTreatment"><span data-i18n="consentTreatmentLabel">ข้าพเจ้าได้อ่านและยินยอมตามข้อความข้างต้น</span> <span class="req">*</span></label>
+        </div>
+
+        <label><span data-i18n="marketingQuestion">ข้าพเจ้ายินยอมให้คลินิกส่งข่าวสาร โปรโมชั่น หรือข้อมูลทางการแพทย์เกี่ยวกับโรคผิวหนังและความงามผ่าน SMS/Email/Line/Facebook Messenger หรือไม่</span> <span class="req">*</span></label>
+        <div class="radio-row">
+          <label><input type="radio" name="consentMarketing" value="yes" required> <span data-i18n="consentYes">ยินยอม</span></label>
+          <label><input type="radio" name="consentMarketing" value="no"> <span data-i18n="consentNo">ไม่ยินยอม</span></label>
+        </div>
+
+        <label><span data-i18n="signatureLabel">พิมพ์ชื่อ-นามสกุลเพื่อยืนยันการยินยอม (e-signature)</span> <span class="req">*</span></label>
+        <input type="text" id="signatureName" required>
+      </div>
+
+      <button type="submit" id="submit-btn" data-i18n="submitBtn">ส่งข้อมูลลงทะเบียน</button>
+      <div id="status-msg"></div>
+    </form>
+  </main>
+</div>
+
+<script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+<script>
+(function () {
+  // Workaround for a known LINE Android WebView bug: liff.init() internally
+  // fetches https://liffsdk.line-scdn.net/xlt/manifest.json (+ a translation
+  // json) and on some Android LINE clients that fetch hangs/fails forever due
+  // to a broken WebView cache entry, which makes liff.init() never settle.
+  // Fix: bust the cache with a random query string on those specific requests.
+  // Source: https://narongdej.dev/blog/th/2024/04/04/ (LINE dev community report).
+  (function patchFetchForLiffAndroidCacheBug() {
+    if (typeof window.fetch !== 'function') return;
+    var originalFetch = window.fetch;
+    window.fetch = function (url, options) {
+      try {
+        var urlStr = (url && url.toString) ? url.toString() : String(url);
+        if (urlStr.indexOf('https://liffsdk.line-scdn.net/xlt/') === 0 && urlStr.indexOf('.json') !== -1) {
+          urlStr += (urlStr.indexOf('?') === -1 ? '?' : '&') + 'ts=' + Math.random();
+          return originalFetch(urlStr, options);
+        }
+      } catch (e) { /* fall through to default fetch */ }
+      return originalFetch(url, options);
+    };
+  })();
+
+  var LIFF_ID = '2010453696-TAP8LGXH';
+  // Apps Script Web App URL (doPost JSON API) — ใช้ตอนหน้านี้ถูกโฮสต์นอก Apps Script (เช่น GitHub Pages)
+  // ถ้า deploy เวอร์ชันใหม่แล้ว URL เปลี่ยน ต้องแก้ค่านี้ด้วย
+  var WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbzi85EaeJIs7p5kyx2QXwyIbRM9m2R-XlPoWFb6ICQgVkIo4yKgUVSsacrtb5MLqtLbqA/exec';
+  var LANG = 'th';
+  var lineProfile = null;
+  var liffInitStarted = false;
+
+  var STR = {
+    loading: { th: 'กำลังโหลดฟอร์ม...', en: 'Loading form...' },
+    startPrompt: { th: 'กดปุ่มด้านล่างเพื่อเริ่มลงทะเบียน', en: 'Tap the button below to begin registration' },
+    startBtn: { th: 'เริ่มลงทะเบียน', en: 'Start Registration' },
+    formTitle: { th: 'แบบฟอร์มลงทะเบียนคนไข้ใหม่', en: 'New Patient Registration Form' },
+    clinicName: { th: 'สายวรีย์ คลินิก บุรีรัมย์', en: 'Saivaree Clinic, Buriram' },
+    loggedInAs: { th: 'เข้าสู่ระบบเป็น', en: 'Logged in as' },
+    section1: { th: '1. ข้อมูลส่วนตัว', en: '1. Personal Information' },
+    firstName: { th: 'ชื่อ', en: 'First name' },
+    lastName: { th: 'นามสกุล', en: 'Last name' },
+    nickname: { th: 'ชื่อที่ท่านต้องการให้เรียก', en: 'Preferred name' },
+    optional: { th: '(ไม่บังคับ)', en: '(Optional)' },
+    idNumber: { th: 'เลขบัตรประชาชน / พาสปอร์ต', en: 'ID Card / Passport Number' },
+    idNumberHint: { th: 'บัตรประชาชนไทย 13 หลัก หรือเลขพาสปอร์ตสำหรับชาวต่างชาติ', en: 'Thai ID: 13 digits, or passport number for foreign nationals' },
+    idNumberErr: { th: 'กรอกเลขบัตร/พาสปอร์ตให้ถูกต้อง', en: 'Please enter a valid ID/passport number' },
+    dob: { th: 'วันเกิด', en: 'Date of birth' },
+    dobHint: { th: 'รูปแบบวันที่: วัน/เดือน/ปี', en: 'Date format: day/month/year' },
+    sex: { th: 'เพศ', en: 'Sex' },
+    male: { th: 'ชาย', en: 'Male' },
+    female: { th: 'หญิง', en: 'Female' },
+    nationality: { th: 'สัญชาติ', en: 'Nationality' },
+    address: { th: 'ที่อยู่', en: 'Address' },
+    phone: { th: 'เบอร์ติดต่อ', en: 'Phone number' },
+    phoneErr: { th: 'กรอกเบอร์โทรศัพท์ให้ถูกต้อง (เช่น 0812345678)', en: 'Please enter a valid phone number (e.g. 0812345678)' },
+    email: { th: 'อีเมล', en: 'Email' },
+    section2: { th: '2. ประวัติสุขภาพ', en: '2. Medical History' },
+    chronic: { th: 'โรคประจำตัว', en: 'Chronic conditions' },
+    allergy: { th: 'ประวัติแพ้ยา', en: 'Drug allergies' },
+    meds: { th: 'ยาที่ทานประจำ', en: 'Regular medication' },
+    choiceNone: { th: 'ไม่มี', en: 'None' },
+    choiceOther: { th: 'มี (ระบุ)', en: 'Yes (please specify)' },
+    phChronic: { th: 'ระบุโรคประจำตัว', en: 'Specify chronic condition(s)' },
+    phAllergy: { th: 'ระบุยาที่แพ้', en: 'Specify drug allergy' },
+    phMeds: { th: 'ระบุยาที่ทานประจำ', en: 'Specify regular medication' },
+    section3: { th: '3. ผู้ติดต่อกรณีฉุกเฉิน', en: '3. Emergency Contact' },
+    emergencyName: { th: 'ชื่อ-นามสกุล', en: 'Full name' },
+    emergencyPhone: { th: 'เบอร์ติดต่อ', en: 'Phone number' },
+    emergencyRelation: { th: 'ความสัมพันธ์', en: 'Relationship' },
+    section4: { th: '4. ข้อมูลเพิ่มเติม', en: '4. Additional Information' },
+    referralSource: { th: 'ท่านรู้จักคลินิกจากทางใด', en: 'How did you hear about our clinic?' },
+    referralSourcePh: { th: 'เช่น Facebook, เพื่อนแนะนำ, Google', en: 'e.g. Facebook, friend referral, Google' },
+    mainReason: { th: 'เหตุผลหลักที่ท่านเลือกรักษาที่คลินิกนี้', en: 'Main reason you chose this clinic' },
+    mainReasonPh: { th: 'เช่น ใกล้บ้าน, รีวิวดี, หมอน่าเชื่อถือ', en: 'e.g. convenient location, good reviews, trusted doctor' },
+    section5: { th: '5. ความยินยอมตาม PDPA', en: '5. PDPA Consent' },
+    consentTreatmentStatement: { th: 'ทางคลินิกมีความจำเป็นต้องเก็บรวบรวม ใช้ และเปิดเผยข้อมูลส่วนบุคคลของท่านเพื่อการให้บริการด้านโรคผิวหนังและความงาม รวมถึงการติดตามผลการรักษา (ทำประวัติคนไข้ และติดตามผลการรักษา)', en: 'The clinic needs to collect, use, and disclose your personal data in order to provide dermatology and aesthetic services, including treatment follow-up (creating patient records and monitoring treatment outcomes).' },
+    consentTreatmentLabel: { th: 'ข้าพเจ้าได้อ่านและยินยอมตามข้อความข้างต้น', en: 'I have read and consent to the statement above.' },
+    marketingQuestion: { th: 'ข้าพเจ้ายินยอมให้คลินิกส่งข่าวสาร โปรโมชั่น หรือข้อมูลทางการแพทย์เกี่ยวกับโรคผิวหนังและความงามผ่าน SMS/Email/Line/Facebook Messenger หรือไม่', en: 'I consent to the clinic sending me news, promotions, or medical information about dermatology and aesthetic treatments via SMS, Email, LINE, or Facebook Messenger.' },
+    consentYes: { th: 'ยินยอม', en: 'I consent' },
+    consentNo: { th: 'ไม่ยินยอม', en: 'I do not consent' },
+    signatureLabel: { th: 'พิมพ์ชื่อ-นามสกุลเพื่อยืนยันการยินยอม (e-signature)', en: 'Type your full name to confirm consent (e-signature)' },
+    submitBtn: { th: 'ส่งข้อมูลลงทะเบียน', en: 'Submit Registration' },
+    submitting: { th: 'กำลังส่งข้อมูล...', en: 'Submitting...' },
+    msgSuccess: { th: 'ลงทะเบียนสำเร็จ ขอบคุณค่ะ', en: 'Registration successful. Thank you.' },
+    msgNeedTreatmentConsent: { th: 'ต้องกดยินยอมตามนโยบาย PDPA (ข้อแรก) ก่อนส่งฟอร์ม', en: 'You must agree to the PDPA consent (first item) before submitting.' },
+    msgNeedMarketingChoice: { th: 'กรุณาเลือกยินยอม/ไม่ยินยอม สำหรับการรับข่าวสารและแจ้งเตือนนัดหมาย', en: 'Please select your preference for receiving news/appointment reminders.' },
+    msgNeedSignature: { th: 'กรุณาพิมพ์ชื่อ-นามสกุลเพื่อยืนยันการยินยอม', en: 'Please type your full name to confirm consent.' },
+    msgGenericError: { th: 'เกิดข้อผิดพลาด กรุณาลองใหม่', en: 'An error occurred. Please try again.' },
+    msgErrorPrefix: { th: 'เกิดข้อผิดพลาด: ', en: 'Error: ' },
+    msgLiffErrorPrefix: { th: 'เกิดข้อผิดพลาดในการเชื่อมต่อ LINE: ', en: 'LINE connection error: ' }
+  };
+
+  function applyLang(lang) {
+    LANG = lang;
+    document.documentElement.lang = lang;
+    document.querySelectorAll('[data-i18n]').forEach(function (el) {
+      var key = el.getAttribute('data-i18n');
+      if (STR[key]) el.textContent = STR[key][lang];
+    });
+    document.querySelectorAll('[data-i18n-ph]').forEach(function (el) {
+      var key = el.getAttribute('data-i18n-ph');
+      if (STR[key]) el.placeholder = STR[key][lang];
+    });
+    document.querySelectorAll('[data-lang-block]').forEach(function (el) {
+      el.classList.toggle('hidden', el.getAttribute('data-lang-block') !== lang);
+    });
+    document.getElementById('btn-lang-th').classList.toggle('active', lang === 'th');
+    document.getElementById('btn-lang-en').classList.toggle('active', lang === 'en');
+  }
+
+  function showApp() {
+    document.getElementById('loading-screen').classList.add('hidden');
+    document.getElementById('app').classList.remove('hidden');
+  }
+
+  function showStatus(msg, type) {
+    var el = document.getElementById('status-msg');
+    el.textContent = msg;
+    el.className = type || '';
+  }
+
+  function renderProfile(profile) {
+    lineProfile = profile;
+    var box = document.getElementById('profile-box');
+    var nameEl = document.getElementById('profile-name');
+    nameEl.textContent = profile.displayName || '';
+    box.classList.remove('hidden');
+  }
+
+  function bindChoiceToggle(radioName, detailId) {
+    var radios = document.querySelectorAll('input[name="' + radioName + '"]');
+    var detail = document.getElementById(detailId);
+    radios.forEach(function (r) {
+      r.addEventListener('change', function () {
+        if (r.value === 'other' && r.checked) {
+          detail.classList.remove('hidden');
+        } else if (r.checked) {
+          detail.classList.add('hidden');
+          detail.value = '';
+        }
+      });
+    });
+  }
+
+  function validatePattern(input, pattern, errId) {
+    var errEl = document.getElementById(errId);
+    input.addEventListener('input', function () {
+      if (input.value && !pattern.test(input.value)) {
+        errEl.classList.add('show');
+        input.setCustomValidity(' ');
+      } else {
+        errEl.classList.remove('show');
+        input.setCustomValidity('');
+      }
+    });
+  }
+
+  function radioValue(name) {
+    var el = document.querySelector('input[name="' + name + '"]:checked');
+    return el ? el.value : '';
+  }
+
+  function choiceDetail(choiceName, detailId) {
+    var choice = radioValue(choiceName);
+    if (choice === 'other') {
+      return document.getElementById(detailId).value || '';
+    }
+    return LANG === 'en' ? 'None' : 'ไม่มี';
+  }
+
+  function toDmy(isoDate) {
+    if (!isoDate) return '';
+    var parts = isoDate.split('-');
+    if (parts.length !== 3) return isoDate;
+    var y = parts[0], m = parts[1], d = parts[2];
+    return d + '/' + m + '/' + y;
+  }
+
+  function initLiff() {
+    if (liffInitStarted) return;
+    liffInitStarted = true;
+
+    if (typeof liff === 'undefined') {
+      showStatus('LIFF SDK โหลดไม่สำเร็จ (liff is undefined) กรุณาเช็คอินเทอร์เน็ตแล้วลองใหม่', 'error');
+      showApp();
+      return;
+    }
+
+    var settled = false;
+    var timeoutId = setTimeout(function () {
+      if (settled) return;
+      settled = true;
+      var diag = 'isInClient=' + (liff.isInClient ? liff.isInClient() : 'n/a') +
+        ', os=' + (liff.getOS ? liff.getOS() : 'n/a') +
+        ', ver=' + (liff.getVersion ? liff.getVersion() : 'n/a') +
+        ', lineVer=' + (liff.getLineVersion ? liff.getLineVersion() : 'n/a');
+      showStatus('LIFF เริ่มต้นไม่สำเร็จ (หมดเวลา 10 วิ) [' + diag + ']', 'error');
+      showApp();
+    }, 10000);
+
+    liff.init({ liffId: LIFF_ID, withLoginOnExternalBrowser: true })
+      .then(function () {
+        if (!liff.isLoggedIn()) {
+          liff.login();
+          return;
+        }
+        return liff.getProfile().then(renderProfile);
+      })
+      .catch(function (err) {
+        liffInitStarted = false;
+        var detail = err ? ((err.code ? err.code + ': ' : '') + (err.message || JSON.stringify(err))) : 'unknown error';
+        showStatus(STR.msgLiffErrorPrefix[LANG] + detail, 'error');
+      })
+      .finally(function () {
+        if (settled) return;
+        settled = true;
+        clearTimeout(timeoutId);
+        showApp();
+      });
+  }
+
+  document.addEventListener('DOMContentLoaded', function () {
+    document.getElementById('btn-lang-th').addEventListener('click', function () { applyLang('th'); });
+    document.getElementById('btn-lang-en').addEventListener('click', function () { applyLang('en'); });
+
+    bindChoiceToggle('chronicChoice', 'chronicDiseaseDetail');
+    bindChoiceToggle('allergyChoice', 'drugAllergyDetail');
+    bindChoiceToggle('medsChoice', 'regularMedsDetail');
+
+    validatePattern(document.getElementById('idNumber'), /^(\d{13}|[A-Za-z0-9]{6,12})$/, 'err-idNumber');
+    validatePattern(document.getElementById('phone'), /^0\d{8,9}$/, 'err-phone');
+    validatePattern(document.getElementById('emergencyPhone'), /^0\d{8,9}$/, 'err-emergencyPhone');
+
+    document.getElementById('patient-form').addEventListener('submit', function (e) {
+      e.preventDefault();
+
+      if (!document.getElementById('consentTreatment').checked) {
+        showStatus(STR.msgNeedTreatmentConsent[LANG], 'error');
+        return;
+      }
+      var marketingChoice = radioValue('consentMarketing');
+      if (!marketingChoice) {
+        showStatus(STR.msgNeedMarketingChoice[LANG], 'error');
+        return;
+      }
+      var signatureName = document.getElementById('signatureName').value.trim();
+      if (!signatureName) {
+        showStatus(STR.msgNeedSignature[LANG], 'error');
+        return;
+      }
+
+      var data = {
+        userId: lineProfile ? lineProfile.userId : '',
+        displayName: lineProfile ? lineProfile.displayName : '',
+        firstName: document.getElementById('firstName').value,
+        lastName: document.getElementById('lastName').value,
+        nickname: document.getElementById('nickname').value,
+        idNumber: document.getElementById('idNumber').value,
+        dob: toDmy(document.getElementById('dob').value),
+        sex: radioValue('sex'),
+        nationality: document.getElementById('nationality').value,
+        address: document.getElementById('address').value,
+        phone: document.getElementById('phone').value,
+        email: document.getElementById('email').value,
+        chronicDisease: choiceDetail('chronicChoice', 'chronicDiseaseDetail'),
+        drugAllergy: choiceDetail('allergyChoice', 'drugAllergyDetail'),
+        regularMeds: choiceDetail('medsChoice', 'regularMedsDetail'),
+        emergencyName: document.getElementById('emergencyName').value,
+        emergencyPhone: document.getElementById('emergencyPhone').value,
+        emergencyRelation: document.getElementById('emergencyRelation').value,
+        referralSource: document.getElementById('referralSource').value,
+        mainReason: document.getElementById('mainReason').value,
+        consentTreatment: document.getElementById('consentTreatment').checked,
+        consentMarketing: marketingChoice,
+        signatureName: signatureName
+      };
+
+      var btn = document.getElementById('submit-btn');
+      btn.disabled = true;
+      btn.textContent = STR.submitting[LANG];
+      showStatus('', '');
+
+      // ใช้ fetch() แทน google.script.run เพราะหน้านี้โฮสต์อยู่นอก Apps Script (GitHub Pages)
+      // Content-Type ต้องเป็น text/plain เพื่อให้ browser มองเป็น "simple request" และไม่ส่ง
+      // CORS preflight (OPTIONS) มาก่อน — Apps Script Web App ไม่รองรับการตอบ preflight นั้น
+      fetch(WEB_APP_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+        body: JSON.stringify(data)
+      })
+        .then(function (res) { return res.json(); })
+        .then(function (result) {
+          btn.disabled = false;
+          btn.textContent = STR.submitBtn[LANG];
+          if (result && result.status === 'ok') {
+            var successMsg = STR.msgSuccess[LANG] + (result.hn ? ' (HN: ' + result.hn + ')' : '');
+            showStatus(successMsg, 'success');
+            document.getElementById('patient-form').reset();
+            applyLang(LANG);
+            if (typeof liff !== 'undefined' && liff.isInClient && liff.isInClient()) {
+              setTimeout(function () { liff.closeWindow(); }, 1500);
+            }
+          } else {
+            showStatus(STR.msgErrorPrefix[LANG] + (result ? result.message : ''), 'error');
+          }
+        })
+        .catch(function (err) {
+          btn.disabled = false;
+          btn.textContent = STR.submitBtn[LANG];
+          showStatus(STR.msgGenericError[LANG], 'error');
+        });
+    });
+
+    document.getElementById('start-btn').addEventListener('click', function () {
+      document.getElementById('start-btn').classList.add('hidden');
+      document.querySelector('#loading-screen p[data-i18n="startPrompt"]').classList.add('hidden');
+      document.getElementById('loading-spinner').classList.remove('hidden');
+      // initLiff() is called directly from this click handler (not on page load)
+      // because Apps Script's mandatory IFRAME sandbox only allows top-level
+      // navigation (which liff.login()'s redirect needs) during a real user
+      // gesture. See: https://developers.google.com/apps-script/guides/html/restrictions
+      initLiff();
+    });
+  });
+})();
+</script>
+</body>
+</html>

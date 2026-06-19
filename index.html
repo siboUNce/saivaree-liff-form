@@ -560,6 +560,39 @@
     return LANG === 'en' ? 'None' : 'ไม่มี';
   }
 
+  function resetSubmitButton(btn) {
+    btn.disabled = false;
+    btn.textContent = STR.submitBtn[LANG];
+  }
+
+  function afterSuccessfulSubmit(message, shouldClose) {
+    showStatus(message, 'success');
+    document.getElementById('patient-form').reset();
+    applyLang(LANG);
+    if (shouldClose && typeof liff !== 'undefined' && liff.isInClient && liff.isInClient()) {
+      setTimeout(function () { liff.closeWindow(); }, 1500);
+    }
+  }
+
+  function submitWithOpaqueFallback(data, btn, originalError) {
+    return fetch(WEB_APP_URL, {
+      method: 'POST',
+      mode: 'no-cors',
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      body: JSON.stringify(data)
+    })
+      .then(function () {
+        resetSubmitButton(btn);
+        afterSuccessfulSubmit('ส่งข้อมูลแล้ว กรุณาตรวจสอบแถวใหม่ใน Google Sheet เพื่อยืนยันผล', false);
+      })
+      .catch(function (fallbackError) {
+        resetSubmitButton(btn);
+        var detail = originalError && originalError.message ? originalError.message : 'unknown error';
+        var fallbackDetail = fallbackError && fallbackError.message ? fallbackError.message : 'unknown error';
+        showStatus(STR.msgGenericError[LANG] + ' [' + detail + ' / fallback: ' + fallbackDetail + ']', 'error');
+      });
+  }
+
   function toDmy(isoDate) {
     if (!isoDate) return '';
     var parts = isoDate.split('-');
@@ -682,24 +715,16 @@
       })
         .then(function (res) { return res.json(); })
         .then(function (result) {
-          btn.disabled = false;
-          btn.textContent = STR.submitBtn[LANG];
+          resetSubmitButton(btn);
           if (result && result.status === 'ok') {
             var successMsg = STR.msgSuccess[LANG] + (result.hn ? ' (HN: ' + result.hn + ')' : '');
-            showStatus(successMsg, 'success');
-            document.getElementById('patient-form').reset();
-            applyLang(LANG);
-            if (typeof liff !== 'undefined' && liff.isInClient && liff.isInClient()) {
-              setTimeout(function () { liff.closeWindow(); }, 1500);
-            }
+            afterSuccessfulSubmit(successMsg, true);
           } else {
             showStatus(STR.msgErrorPrefix[LANG] + (result ? result.message : ''), 'error');
           }
         })
         .catch(function (err) {
-          btn.disabled = false;
-          btn.textContent = STR.submitBtn[LANG];
-          showStatus(STR.msgGenericError[LANG], 'error');
+          submitWithOpaqueFallback(data, btn, err);
         });
     });
 

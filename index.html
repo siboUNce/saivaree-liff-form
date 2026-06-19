@@ -574,23 +574,42 @@
     }
   }
 
-  function submitWithOpaqueFallback(data, btn, originalError) {
-    return fetch(WEB_APP_URL, {
-      method: 'POST',
-      mode: 'no-cors',
-      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-      body: JSON.stringify(data)
-    })
-      .then(function () {
-        resetSubmitButton(btn);
-        afterSuccessfulSubmit('ส่งข้อมูลแล้ว กรุณาตรวจสอบแถวใหม่ใน Google Sheet เพื่อยืนยันผล', false);
-      })
-      .catch(function (fallbackError) {
-        resetSubmitButton(btn);
-        var detail = originalError && originalError.message ? originalError.message : 'unknown error';
-        var fallbackDetail = fallbackError && fallbackError.message ? fallbackError.message : 'unknown error';
-        showStatus(STR.msgGenericError[LANG] + ' [' + detail + ' / fallback: ' + fallbackDetail + ']', 'error');
-      });
+  function submitWithFormFallback(data, btn, originalError) {
+    try {
+      var frameName = 'submit-frame-' + Date.now();
+      var iframe = document.createElement('iframe');
+      iframe.name = frameName;
+      iframe.className = 'hidden';
+
+      var form = document.createElement('form');
+      form.method = 'POST';
+      form.action = WEB_APP_URL;
+      form.target = frameName;
+      form.className = 'hidden';
+
+      var payloadInput = document.createElement('input');
+      payloadInput.type = 'hidden';
+      payloadInput.name = 'payload';
+      payloadInput.value = JSON.stringify(data);
+      form.appendChild(payloadInput);
+
+      document.body.appendChild(iframe);
+      document.body.appendChild(form);
+      form.submit();
+
+      resetSubmitButton(btn);
+      afterSuccessfulSubmit('ส่งข้อมูลแล้ว กรุณาตรวจสอบแถวใหม่ใน Google Sheet เพื่อยืนยันผล', false);
+
+      setTimeout(function () {
+        if (form.parentNode) form.parentNode.removeChild(form);
+        if (iframe.parentNode) iframe.parentNode.removeChild(iframe);
+      }, 30000);
+    } catch (fallbackError) {
+      resetSubmitButton(btn);
+      var detail = originalError && originalError.message ? originalError.message : 'unknown error';
+      var fallbackDetail = fallbackError && fallbackError.message ? fallbackError.message : 'unknown error';
+      showStatus(STR.msgGenericError[LANG] + ' [' + detail + ' / fallback: ' + fallbackDetail + ']', 'error');
+    }
   }
 
   function toDmy(isoDate) {
@@ -724,7 +743,7 @@
           }
         })
         .catch(function (err) {
-          submitWithOpaqueFallback(data, btn, err);
+          submitWithFormFallback(data, btn, err);
         });
     });
 

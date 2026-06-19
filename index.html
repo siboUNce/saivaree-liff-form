@@ -41,16 +41,6 @@
     padding: 0 24px;
     gap: 16px;
   }
-  #start-btn {
-    padding: 14px 28px;
-    font-size: 15px;
-    font-weight: 600;
-    color: #fff;
-    background: var(--accent);
-    border: none;
-    border-radius: 10px;
-    cursor: pointer;
-  }
   #app { max-width: 480px; margin: 0 auto; padding: 0 16px 40px; }
   header {
     background: var(--logo-band);
@@ -216,9 +206,7 @@
 <body>
 
 <div id="loading-screen">
-  <p data-i18n="startPrompt">กดปุ่มด้านล่างเพื่อเริ่มลงทะเบียน</p>
-  <button type="button" id="start-btn" data-i18n="startBtn">เริ่มลงทะเบียน</button>
-  <span id="loading-spinner" class="hidden" data-i18n="loading">กำลังโหลดฟอร์ม...</span>
+  <span id="loading-spinner" data-i18n="loading">กำลังโหลดฟอร์ม...</span>
 </div>
 
 <div id="app" class="hidden">
@@ -423,8 +411,6 @@
 
   var STR = {
     loading: { th: 'กำลังโหลดฟอร์ม...', en: 'Loading form...' },
-    startPrompt: { th: 'กดปุ่มด้านล่างเพื่อเริ่มลงทะเบียน', en: 'Tap the button below to begin registration' },
-    startBtn: { th: 'เริ่มลงทะเบียน', en: 'Start Registration' },
     formTitle: { th: 'แบบฟอร์มลงทะเบียนคนไข้ใหม่', en: 'New Patient Registration Form' },
     clinicName: { th: 'สายวรีย์ คลินิก บุรีรัมย์', en: 'Saivaree Clinic, Buriram' },
     loggedInAs: { th: 'เข้าสู่ระบบเป็น', en: 'Logged in as' },
@@ -737,6 +723,7 @@
           resetSubmitButton(btn);
           if (result && result.status === 'ok') {
             var successMsg = STR.msgSuccess[LANG] + (result.hn ? ' (HN: ' + result.hn + ')' : '');
+            if (result.row) successMsg += ' แถวที่ ' + result.row;
             afterSuccessfulSubmit(successMsg, true);
           } else {
             showStatus(STR.msgErrorPrefix[LANG] + (result ? result.message : ''), 'error');
@@ -747,16 +734,7 @@
         });
     });
 
-    document.getElementById('start-btn').addEventListener('click', function () {
-      document.getElementById('start-btn').classList.add('hidden');
-      document.querySelector('#loading-screen p[data-i18n="startPrompt"]').classList.add('hidden');
-      document.getElementById('loading-spinner').classList.remove('hidden');
-      // initLiff() is called directly from this click handler (not on page load)
-      // because Apps Script's mandatory IFRAME sandbox only allows top-level
-      // navigation (which liff.login()'s redirect needs) during a real user
-      // gesture. See: https://developers.google.com/apps-script/guides/html/restrictions
-      initLiff();
-    });
+    initLiff();
   });
 })();
 </script>

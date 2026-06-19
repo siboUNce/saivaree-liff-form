@@ -723,7 +723,6 @@
           resetSubmitButton(btn);
           if (result && result.status === 'ok') {
             var successMsg = STR.msgSuccess[LANG] + (result.hn ? ' (HN: ' + result.hn + ')' : '');
-            if (result.row) successMsg += ' แถวที่ ' + result.row;
             afterSuccessfulSubmit(successMsg, true);
           } else {
             showStatus(STR.msgErrorPrefix[LANG] + (result ? result.message : ''), 'error');

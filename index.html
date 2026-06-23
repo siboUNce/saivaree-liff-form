@@ -234,8 +234,8 @@
         <label><span data-i18n="lastName">นามสกุล</span> <span class="req">*</span></label>
         <input type="text" id="lastName" required>
 
-        <label><span data-i18n="nickname">ชื่อที่ท่านต้องการให้เรียก</span> <span class="optional" data-i18n="optional">(ไม่บังคับ)</span></label>
-        <input type="text" id="nickname">
+        <label><span data-i18n="nickname">ชื่อเล่นหรือชื่อที่ต้องการให้เรียก</span> <span class="req">*</span></label>
+        <input type="text" id="nickname" required>
 
         <label><span data-i18n="idNumber">เลขบัตรประชาชน / พาสปอร์ต</span> <span class="req">*</span></label>
         <input type="text" id="idNumber" required>
@@ -262,8 +262,10 @@
         <input type="tel" id="phone" required>
         <div class="error-text" id="err-phone" data-i18n="phoneErr">กรอกเบอร์โทรศัพท์ให้ถูกต้อง (เช่น 0812345678)</div>
 
-        <label><span data-i18n="email">อีเมล</span> <span class="optional" data-i18n="optional">(ไม่บังคับ)</span></label>
-        <input type="email" id="email">
+        <label><span data-i18n="email">อีเมล หากไม่มีให้กรอก -</span> <span class="req">*</span></label>
+        <input type="text" id="email" required>
+        <div class="hint" data-i18n="emailHint">กรอกอีเมล เช่น name@example.com หรือกรอก - หากไม่มีอีเมล</div>
+        <div class="error-text" id="err-email" data-i18n="emailErr">กรุณากรอกอีเมลให้ถูกต้อง หรือกรอก - หากไม่มีอีเมล</div>
       </div>
 
       <div class="section">
@@ -417,7 +419,7 @@
     section1: { th: '1. ข้อมูลส่วนตัว', en: '1. Personal Information' },
     firstName: { th: 'ชื่อ', en: 'First name' },
     lastName: { th: 'นามสกุล', en: 'Last name' },
-    nickname: { th: 'ชื่อที่ท่านต้องการให้เรียก', en: 'Preferred name' },
+    nickname: { th: 'ชื่อเล่นหรือชื่อที่ต้องการให้เรียก', en: 'Nickname or preferred name' },
     optional: { th: '(ไม่บังคับ)', en: '(Optional)' },
     idNumber: { th: 'เลขบัตรประชาชน / พาสปอร์ต', en: 'ID Card / Passport Number' },
     idNumberHint: { th: 'บัตรประชาชนไทย 13 หลัก หรือเลขพาสปอร์ตสำหรับชาวต่างชาติ', en: 'Thai ID: 13 digits, or passport number for foreign nationals' },
@@ -431,7 +433,9 @@
     address: { th: 'ที่อยู่', en: 'Address' },
     phone: { th: 'เบอร์ติดต่อ', en: 'Phone number' },
     phoneErr: { th: 'กรอกเบอร์โทรศัพท์ให้ถูกต้อง (เช่น 0812345678)', en: 'Please enter a valid phone number (e.g. 0812345678)' },
-    email: { th: 'อีเมล', en: 'Email' },
+    email: { th: 'อีเมล หากไม่มีให้กรอก -', en: 'Email, or enter - if none' },
+    emailHint: { th: 'กรอกอีเมล เช่น name@example.com หรือกรอก - หากไม่มีอีเมล', en: 'Enter an email such as name@example.com, or enter - if none' },
+    emailErr: { th: 'กรุณากรอกอีเมลให้ถูกต้อง หรือกรอก - หากไม่มีอีเมล', en: 'Please enter a valid email, or - if none' },
     section2: { th: '2. ประวัติสุขภาพ', en: '2. Medical History' },
     chronic: { th: 'โรคประจำตัว', en: 'Chronic conditions' },
     allergy: { th: 'ประวัติแพ้ยา', en: 'Drug allergies' },
@@ -463,6 +467,9 @@
     msgNeedTreatmentConsent: { th: 'ต้องกดยินยอมตามนโยบาย PDPA (ข้อแรก) ก่อนส่งฟอร์ม', en: 'You must agree to the PDPA consent (first item) before submitting.' },
     msgNeedMarketingChoice: { th: 'กรุณาเลือกยินยอม/ไม่ยินยอม สำหรับการรับข่าวสารและแจ้งเตือนนัดหมาย', en: 'Please select your preference for receiving news/appointment reminders.' },
     msgNeedSignature: { th: 'กรุณาพิมพ์ชื่อ-นามสกุลเพื่อยืนยันการยินยอม', en: 'Please type your full name to confirm consent.' },
+    msgNeedNickname: { th: 'กรุณากรอกชื่อเล่นหรือชื่อที่ต้องการให้เรียก', en: 'Please enter a nickname or preferred name.' },
+    msgNeedEmail: { th: 'กรุณากรอกอีเมล หากไม่มีให้กรอก -', en: 'Please enter an email, or - if none.' },
+    msgInvalidEmail: { th: 'กรุณากรอกอีเมลให้ถูกต้อง หรือกรอก - หากไม่มีอีเมล', en: 'Please enter a valid email, or - if none.' },
     msgGenericError: { th: 'เกิดข้อผิดพลาด กรุณาลองใหม่', en: 'An error occurred. Please try again.' },
     msgErrorPrefix: { th: 'เกิดข้อผิดพลาด: ', en: 'Error: ' },
     msgLiffErrorPrefix: { th: 'เกิดข้อผิดพลาดในการเชื่อมต่อ LINE: ', en: 'LINE connection error: ' }
@@ -531,6 +538,12 @@
         input.setCustomValidity('');
       }
     });
+  }
+
+  function isValidEmailOrDash(value) {
+    var email = String(value || '').trim();
+    if (email === '-') return true;
+    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
   }
 
   function radioValue(name) {
@@ -624,9 +637,9 @@
         ', os=' + (liff.getOS ? liff.getOS() : 'n/a') +
         ', ver=' + (liff.getVersion ? liff.getVersion() : 'n/a') +
         ', lineVer=' + (liff.getLineVersion ? liff.getLineVersion() : 'n/a');
-      showStatus('LIFF เริ่มต้นไม่สำเร็จ (หมดเวลา 10 วิ) [' + diag + ']', 'error');
+      showStatus('LIFF เริ่มต้นไม่สำเร็จ (หมดเวลา 30 วิ) [' + diag + ']', 'error');
       showApp();
-    }, 10000);
+    }, 30000);
 
     liff.init({ liffId: LIFF_ID, withLoginOnExternalBrowser: true })
       .then(function () {
@@ -660,9 +673,29 @@
     validatePattern(document.getElementById('idNumber'), /^(\d{13}|[A-Za-z0-9]{6,12})$/, 'err-idNumber');
     validatePattern(document.getElementById('phone'), /^0\d{8,9}$/, 'err-phone');
     validatePattern(document.getElementById('emergencyPhone'), /^0\d{8,9}$/, 'err-emergencyPhone');
+    validatePattern(document.getElementById('email'), /^(-|[^\s@]+@[^\s@]+\.[^\s@]+)$/, 'err-email');
 
     document.getElementById('patient-form').addEventListener('submit', function (e) {
       e.preventDefault();
+
+      var nickname = document.getElementById('nickname').value.trim();
+      if (!nickname) {
+        showStatus(STR.msgNeedNickname[LANG], 'error');
+        document.getElementById('nickname').focus();
+        return;
+      }
+
+      var email = document.getElementById('email').value.trim();
+      if (!email) {
+        showStatus(STR.msgNeedEmail[LANG], 'error');
+        document.getElementById('email').focus();
+        return;
+      }
+      if (!isValidEmailOrDash(email)) {
+        showStatus(STR.msgInvalidEmail[LANG], 'error');
+        document.getElementById('email').focus();
+        return;
+      }
 
       if (!document.getElementById('consentTreatment').checked) {
         showStatus(STR.msgNeedTreatmentConsent[LANG], 'error');
@@ -684,14 +717,14 @@
         displayName: lineProfile ? lineProfile.displayName : '',
         firstName: document.getElementById('firstName').value,
         lastName: document.getElementById('lastName').value,
-        nickname: document.getElementById('nickname').value,
+        nickname: nickname,
         idNumber: document.getElementById('idNumber').value,
         dob: toDmy(document.getElementById('dob').value),
         sex: radioValue('sex'),
         nationality: document.getElementById('nationality').value,
         address: document.getElementById('address').value,
         phone: document.getElementById('phone').value,
-        email: document.getElementById('email').value,
+        email: email,
         chronicDisease: choiceDetail('chronicChoice', 'chronicDiseaseDetail'),
         drugAllergy: choiceDetail('allergyChoice', 'drugAllergyDetail'),
         regularMeds: choiceDetail('medsChoice', 'regularMedsDetail'),

@@ -45,23 +45,32 @@
   header {
     background: var(--logo-band);
     text-align: center;
-    margin: 0 -16px 16px;
-    padding: 28px 16px 18px;
+    margin: 0 -16px 14px;
+    padding: 16px 16px 14px;
     border-radius: 0 0 20px 20px;
   }
-  header img { max-width: 200px; height: auto; display: block; margin: 0 auto; }
+
+  header img {
+    width: 170px;
+    height: 44px;
+    object-fit: contain;
+    display: block;
+    margin: 0 auto 10px;
+  }
+
   header .clinic-name {
-    margin: 10px 0 2px;
+    margin: 0 0 8px;
     font-size: 15px;
     font-weight: 600;
     color: #fff;
   }
+
   .lang-switch {
     display: flex;
     justify-content: center;
     align-items: center;
     gap: 6px;
-    margin: 10px 0 4px;
+    margin: 0;
   }
   .lang-btn {
     border: 1px solid #fff;
@@ -212,7 +221,7 @@
 <div id="app" class="hidden">
   <header>
     <h1 class="sr-only" data-i18n="formTitle">แบบฟอร์มลงทะเบียนคนไข้ใหม่</h1>
-    <img src="./logo.png" alt="สายวรีย์ คลินิก บุรีรัมย์">
+    <img src="./logo.png?v=2" alt="สายวรีย์ คลินิก บุรีรัมย์">
     <div class="clinic-name" data-i18n="clinicName">สายวรีย์ คลินิก บุรีรัมย์</div>
     <div class="lang-switch">
       <button type="button" id="btn-lang-th" class="lang-btn active">ไทย</button>

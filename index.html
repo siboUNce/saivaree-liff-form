@@ -51,8 +51,8 @@
   }
 
 header img {
-  width: 150px;
-  height: 150px;
+  width: 190px;
+  height: 190px;
   object-fit: contain;
   display: block;
   margin: 0 auto 10px;
@@ -221,7 +221,7 @@ header img {
 <div id="app" class="hidden">
   <header>
     <h1 class="sr-only" data-i18n="formTitle">แบบฟอร์มลงทะเบียนคนไข้ใหม่</h1>
-    <img src="./logo.png?v=3" alt="สายวรีย์ คลินิก บุรีรัมย์">
+    <img src="./logo.png?v=31" alt="สายวรีย์ คลินิก บุรีรัมย์">
     <div class="clinic-name" data-i18n="clinicName">สายวรีย์ คลินิก บุรีรัมย์</div>
     <div class="lang-switch">
       <button type="button" id="btn-lang-th" class="lang-btn active">ไทย</button>
@@ -411,6 +411,17 @@ header img {
   var LANG = 'th';
   var lineProfile = null;
   var liffInitStarted = false;
+  var submitInProgress = false;
+  var currentRequestId = '';
+
+  function makeRequestId() {
+    return [
+      'liff',
+      Date.now(),
+      Math.random().toString(36).slice(2),
+      lineProfile ? lineProfile.userId : 'nouser'
+    ].join('-');
+  }
 
   var STR = {
     loading: { th: 'กำลังโหลดฟอร์ม...', en: 'Loading form...' },
@@ -574,44 +585,6 @@ header img {
     }
   }
 
-  function submitWithFormFallback(data, btn, originalError) {
-    try {
-      var frameName = 'submit-frame-' + Date.now();
-      var iframe = document.createElement('iframe');
-      iframe.name = frameName;
-      iframe.className = 'hidden';
-
-      var form = document.createElement('form');
-      form.method = 'POST';
-      form.action = WEB_APP_URL;
-      form.target = frameName;
-      form.className = 'hidden';
-
-      var payloadInput = document.createElement('input');
-      payloadInput.type = 'hidden';
-      payloadInput.name = 'payload';
-      payloadInput.value = JSON.stringify(data);
-      form.appendChild(payloadInput);
-
-      document.body.appendChild(iframe);
-      document.body.appendChild(form);
-      form.submit();
-
-      resetSubmitButton(btn);
-      afterSuccessfulSubmit('ส่งข้อมูลแล้ว กรุณาตรวจสอบแถวใหม่ใน Google Sheet เพื่อยืนยันผล', false);
-
-      setTimeout(function () {
-        if (form.parentNode) form.parentNode.removeChild(form);
-        if (iframe.parentNode) iframe.parentNode.removeChild(iframe);
-      }, 30000);
-    } catch (fallbackError) {
-      resetSubmitButton(btn);
-      var detail = originalError && originalError.message ? originalError.message : 'unknown error';
-      var fallbackDetail = fallbackError && fallbackError.message ? fallbackError.message : 'unknown error';
-      showStatus(STR.msgGenericError[LANG] + ' [' + detail + ' / fallback: ' + fallbackDetail + ']', 'error');
-    }
-  }
-
   function toDmy(isoDate) {
     if (!isoDate) return '';
     var parts = isoDate.split('-');
@@ -713,7 +686,17 @@ header img {
         return;
       }
 
+      if (submitInProgress) {
+        showStatus('กำลังส่งข้อมูล กรุณารอสักครู่', 'error');
+        return;
+      }
+      submitInProgress = true;
+      if (!currentRequestId) {
+        currentRequestId = makeRequestId();
+      }
+
       var data = {
+        requestId: currentRequestId,
         userId: lineProfile ? lineProfile.userId : '',
         displayName: lineProfile ? lineProfile.displayName : '',
         firstName: document.getElementById('firstName').value,
@@ -751,12 +734,13 @@ header img {
       })
         .then(function (res) { return res.json(); })
         .then(function (result) {
-          resetSubmitButton(btn);
           if (result && result.status === 'ok') {
             var successMsg = STR.msgSuccess[LANG] + (result.hn ? ' (HN: ' + result.hn + ')' : '');
             showStatus(successMsg, 'success');
             document.getElementById('patient-form').reset();
             applyLang(LANG);
+            btn.disabled = true;
+            btn.textContent = STR.msgSuccess[LANG];
 
             if (typeof liff !== 'undefined' && liff.isInClient && liff.isInClient()) {
               var pushText = LANG === 'en' ? '✓ Registration completed' : '✓ ลงทะเบียนคนไข้ใหม่เรียบร้อยแล้วค่ะ';
@@ -778,11 +762,16 @@ header img {
               });
             }
           } else {
+            submitInProgress = false;
+            resetSubmitButton(btn);
             showStatus(STR.msgErrorPrefix[LANG] + (result ? result.message : ''), 'error');
           }
         })
         .catch(function (err) {
-          submitWithFormFallback(data, btn, err);
+          btn.disabled = true;
+          btn.textContent = 'กรุณาแจ้งเจ้าหน้าที่';
+          showStatus('ไม่สามารถยืนยันผลการส่งได้ กรุณาแจ้งเจ้าหน้าที่ตรวจสอบใน Google Sheet ก่อนส่งซ้ำ', 'error');
+          console.error('Submit error:', err);
         });
     });
 

@@ -698,7 +698,7 @@ header img {
     } else {
       message = STR.msgAccountUnavailable[LANG];
     }
-    return isLink && code ? message + ' [' + code + ']' : message;
+    return message;
   }
 
   function postMyAccount(payload) {

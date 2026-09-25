@@ -697,12 +697,20 @@ header img {
   }
 
   function postMyAccount(payload) {
+    var controller = typeof AbortController !== 'undefined' ? new AbortController() : null;
+    var timeoutId = setTimeout(function () {
+      if (controller) controller.abort();
+    }, 15000);
+
     return fetch(WEB_APP_URL, {
       method: 'POST',
       headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-      body: JSON.stringify(payload)
+      body: JSON.stringify(payload),
+      signal: controller ? controller.signal : undefined
     }).then(function (res) {
       return res.json();
+    }).finally(function () {
+      clearTimeout(timeoutId);
     });
   }
 

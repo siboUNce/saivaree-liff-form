@@ -688,12 +688,17 @@ header img {
 
   function accountFailureMessage(result, isLink) {
     var code = result && result.error ? result.error.code : '';
-    if (code === 'INVALID_TOKEN') return STR.msgAccountReconnect[LANG];
-    if (code === 'CONFIG_ERROR' || code === 'UPSTREAM_ERROR' || code === 'REQUEST_FAILED') {
-      return STR.msgAccountUnavailable[LANG];
+    var message;
+    if (code === 'INVALID_TOKEN') {
+      message = STR.msgAccountReconnect[LANG];
+    } else if (code === 'CONFIG_ERROR' || code === 'UPSTREAM_ERROR' || code === 'REQUEST_FAILED') {
+      message = STR.msgAccountUnavailable[LANG];
+    } else if (isLink || code === 'LINK_UNAVAILABLE') {
+      message = STR.msgLinkUnavailable[LANG];
+    } else {
+      message = STR.msgAccountUnavailable[LANG];
     }
-    if (isLink || code === 'LINK_UNAVAILABLE') return STR.msgLinkUnavailable[LANG];
-    return STR.msgAccountUnavailable[LANG];
+    return isLink && code ? message + ' [' + code + ']' : message;
   }
 
   function postMyAccount(payload) {

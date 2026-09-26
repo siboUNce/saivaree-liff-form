@@ -1215,7 +1215,7 @@ header img {
             btn.disabled = true;
             btn.textContent = STR.msgSuccess[LANG];
 
-            if (result.accountLinked === true && typeof liff !== 'undefined' && liff.isInClient && liff.isInClient()) {
+            if (typeof liff !== 'undefined' && liff.isInClient && liff.isInClient()) {
               var pushText = LANG === 'en' ? '✓ Registration completed' : '✓ ลงทะเบียนคนไข้ใหม่เรียบร้อยแล้วค่ะ';
               if (result.hn) {
                 pushText += ' (HN: ' + result.hn + ')';

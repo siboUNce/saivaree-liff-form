@@ -1231,7 +1231,13 @@ header img {
                 setTimeout(function () { liff.closeWindow(); }, 1000);
               }).catch(function (err) {
                 console.error('Error sending message:', err);
-                setTimeout(function () { liff.closeWindow(); }, 1500);
+                showStatus(
+                  successMsg +
+                    (LANG === 'en'
+                      ? ' but could not send the confirmation message to LINE chat.'
+                      : ' แต่ไม่สามารถส่งข้อความยืนยันเข้า LINE chat ได้ กรุณาแจ้งเจ้าหน้าที่'),
+                  'error'
+                );
               });
             }
           } else {

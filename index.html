@@ -1189,6 +1189,28 @@ header img {
         body: JSON.stringify(data)
       })
         .then(function (res) { return res.json(); })
+        .catch(function (err) {
+          // The registration may have been saved even if its response was lost.
+          // Resolve once using the submitted proof; never repeat registration.
+          return postMyAccount({
+            action: 'my_account_resolve',
+            accessToken: data.accessToken,
+            phone: data.phone,
+            birthdate: data.dobIso
+          }).then(function (result) {
+            var recovered = result && result.ok === true && result.data;
+            var patient = recovered && recovered.linked === true &&
+              recovered.account && recovered.account.patient;
+            var candidate = recovered && recovered.linked === false &&
+              recovered.link_token && recovered.candidate;
+            var hn = patient ? patient.hn : (candidate ? candidate.hn : '');
+            if ((typeof hn === 'string' && hn.trim()) ||
+                (typeof hn === 'number' && isFinite(hn) && hn > 0)) {
+              return { status: 'ok', hn: hn, accountLinked: recovered.linked === true };
+            }
+            throw err;
+          });
+        })
         .then(function (result) {
           if (result && result.status === 'existing_patient') {
             submitInProgress = false;

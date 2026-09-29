@@ -1228,7 +1228,7 @@ header img {
           }
           if (result && result.status === 'ok') {
             var successMsg = STR.msgSuccess[LANG] + (result.hn ? ' (HN: ' + result.hn + ')' : '');
-            if (result.accountLinked !== true) {
+            if (result.accountLinked !== true && result.accountLinkPending !== true) {
               successMsg += ' ' + STR.msgRegistrationLinkPending[LANG];
             }
             showStatus(successMsg, 'success');

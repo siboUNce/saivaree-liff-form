@@ -425,11 +425,31 @@ header img {
       <div class="section">
         <h2 data-i18n="section4">4. ข้อมูลเพิ่มเติม</h2>
 
-        <label><span data-i18n="referralSource">ท่านรู้จักคลินิกจากทางใด</span> <span class="optional" data-i18n="optional">(ไม่บังคับ)</span></label>
-        <input type="text" id="referralSource" data-i18n-ph="referralSourcePh" placeholder="เช่น Facebook, เพื่อนแนะนำ, Google">
+        <label><span data-i18n="referralSource">ท่านรู้จักคลินิกจากทางใด</span> <span class="req">*</span> <span class="optional" data-i18n="multiSelect">(เลือกได้มากกว่า 1 ข้อ)</span></label>
+        <div class="choice-row">
+          <label><input type="checkbox" name="referralSource" value="คนรู้จักแนะนำ (Referred by friend)"> <span data-i18n="refFriend">คนรู้จักแนะนำ</span></label>
+          <label><input type="checkbox" name="referralSource" value="Facebook (โฆษณา)"> <span data-i18n="refFbAd">เห็นโฆษณาใน Facebook</span></label>
+          <label><input type="checkbox" name="referralSource" value="Facebook (เพจ/โพสต์)"> <span data-i18n="refFbPage">เพจ/โพสต์ Facebook</span></label>
+          <label><input type="checkbox" name="referralSource" value="TikTok"> <span>TikTok</span></label>
+          <label><input type="checkbox" name="referralSource" value="Google"> <span data-i18n="refGoogle">Google / Google Maps</span></label>
+          <label><input type="checkbox" name="referralSource" value="Instagram"> <span>Instagram</span></label>
+          <label><input type="checkbox" name="referralSource" value="LINE"> <span>LINE</span></label>
+          <label><input type="checkbox" name="referralSource" value="ป้ายหน้าร้าน (Storefront sign)"> <span data-i18n="refSign">ป้ายหน้าร้าน</span></label>
+          <label><input type="checkbox" name="referralSource" value="other"> <span data-i18n="choiceOtherSpecify">อื่นๆ (ระบุ)</span></label>
+        </div>
+        <input type="text" id="referralSourceDetail" class="hidden" data-i18n-ph="otherPh" placeholder="ระบุ">
 
         <label><span data-i18n="mainReason">เหตุผลหลักที่ท่านเลือกรักษาที่คลินิกนี้</span> <span class="optional" data-i18n="optional">(ไม่บังคับ)</span></label>
-        <input type="text" id="mainReason" data-i18n-ph="mainReasonPh" placeholder="เช่น ใกล้บ้าน, รีวิวดี, หมอน่าเชื่อถือ">
+        <div class="choice-row">
+          <label><input type="radio" name="mainReason" value="คุณหมอน่าเชื่อถือ (Doctor’s credibility)"> <span data-i18n="reasonDoctor">คุณหมอน่าเชื่อถือ</span></label>
+          <label><input type="radio" name="mainReason" value="คนรู้จักแนะนำ (Recommended by friend)"> <span data-i18n="reasonFriend">คนรู้จักแนะนำ</span></label>
+          <label><input type="radio" name="mainReason" value="ใกล้บ้าน (Convenient location)"> <span data-i18n="reasonNear">ใกล้บ้าน</span></label>
+          <label><input type="radio" name="mainReason" value="รีวิวดี (Good reviews)"> <span data-i18n="reasonReview">รีวิวดี</span></label>
+          <label><input type="radio" name="mainReason" value="บรรยากาศร้าน (Clinic atmosphere)"> <span data-i18n="reasonAtmos">บรรยากาศร้าน</span></label>
+          <label><input type="radio" name="mainReason" value="โปรโมชั่น (Promotions)"> <span data-i18n="reasonPromo">โปรโมชั่น</span></label>
+          <label><input type="radio" name="mainReason" value="other"> <span data-i18n="choiceOtherSpecify">อื่นๆ (ระบุ)</span></label>
+        </div>
+        <input type="text" id="mainReasonDetail" class="hidden" data-i18n-ph="otherPh" placeholder="ระบุ">
       </div>
 
       <div class="section">
@@ -574,9 +594,22 @@ header img {
     emergencyRelation: { th: 'ความสัมพันธ์', en: 'Relationship' },
     section4: { th: '4. ข้อมูลเพิ่มเติม', en: '4. Additional Information' },
     referralSource: { th: 'ท่านรู้จักคลินิกจากทางใด', en: 'How did you hear about our clinic?' },
-    referralSourcePh: { th: 'เช่น Facebook, เพื่อนแนะนำ, Google', en: 'e.g. Facebook, friend referral, Google' },
+    multiSelect: { th: '(เลือกได้มากกว่า 1 ข้อ)', en: '(select all that apply)' },
+    refFriend: { th: 'คนรู้จักแนะนำ', en: 'Referred by a friend' },
+    refFbAd: { th: 'เห็นโฆษณาใน Facebook', en: 'Facebook ad' },
+    refFbPage: { th: 'เพจ/โพสต์ Facebook', en: 'Facebook page / post' },
+    refGoogle: { th: 'Google / Google Maps', en: 'Google / Google Maps' },
+    refSign: { th: 'ป้ายหน้าร้าน', en: 'Storefront sign' },
     mainReason: { th: 'เหตุผลหลักที่ท่านเลือกรักษาที่คลินิกนี้', en: 'Main reason you chose this clinic' },
-    mainReasonPh: { th: 'เช่น ใกล้บ้าน, รีวิวดี, หมอน่าเชื่อถือ', en: 'e.g. convenient location, good reviews, trusted doctor' },
+    reasonDoctor: { th: 'คุณหมอน่าเชื่อถือ', en: 'Trusted doctor' },
+    reasonFriend: { th: 'คนรู้จักแนะนำ', en: 'Recommended by a friend' },
+    reasonNear: { th: 'ใกล้บ้าน', en: 'Convenient location' },
+    reasonReview: { th: 'รีวิวดี', en: 'Good reviews' },
+    reasonAtmos: { th: 'บรรยากาศร้าน', en: 'Clinic atmosphere' },
+    reasonPromo: { th: 'โปรโมชั่น', en: 'Promotions' },
+    choiceOtherSpecify: { th: 'อื่นๆ (ระบุ)', en: 'Other (please specify)' },
+    otherPh: { th: 'ระบุ', en: 'Please specify' },
+    msgNeedReferral: { th: 'กรุณาเลือกว่าท่านรู้จักคลินิกจากทางใด', en: 'Please tell us how you heard about the clinic.' },
     section5: { th: '5. ความยินยอมตาม PDPA', en: '5. PDPA Consent' },
     consentTreatmentStatement: { th: 'ทางคลินิกมีความจำเป็นต้องเก็บรวบรวม ใช้ และเปิดเผยข้อมูลส่วนบุคคลของท่าน เพื่อการให้บริการด้านโรคผิวหนังและความงาม รวมถึงการจัดทำประวัติคนไข้ การบันทึกรูปถ่ายก่อนและหลังทำการรักษา และการติดตามผลการรักษา', en: 'The clinic needs to collect, use, and disclose your personal data in order to provide dermatology and aesthetic services, including creating patient records, recording before-and-after treatment photos, and following up on treatment outcomes.' },
     consentTreatmentLabel: { th: 'ข้าพเจ้าได้อ่านและยินยอมตามข้อความข้างต้น', en: 'I have read and consent to the statement above.' },
@@ -983,6 +1016,33 @@ header img {
     return el ? el.value : '';
   }
 
+  function checkedValues(name, detailId) {
+    var values = [];
+    document.querySelectorAll('input[name="' + name + '"]:checked').forEach(function (el) {
+      if (el.value === 'other') {
+        var detail = document.getElementById(detailId).value.trim();
+        values.push(detail ? 'อื่นๆ: ' + detail : 'อื่นๆ');
+      } else {
+        values.push(el.value);
+      }
+    });
+    return values.join(', ');
+  }
+
+  function bindOtherDetail(name, detailId) {
+    var detail = document.getElementById(detailId);
+    var other = document.querySelector('input[name="' + name + '"][value="other"]');
+    document.querySelectorAll('input[name="' + name + '"]').forEach(function (el) {
+      el.addEventListener('change', function () {
+        detail.classList.toggle('hidden', !other.checked);
+        if (!other.checked) detail.value = '';
+      });
+    });
+    document.getElementById('patient-form').addEventListener('reset', function () {
+      detail.classList.add('hidden');
+    });
+  }
+
   function choiceDetail(choiceName, detailId) {
     var choice = radioValue(choiceName);
     if (choice === 'other') {
@@ -1091,6 +1151,8 @@ header img {
     bindChoiceToggle('chronicChoice', 'chronicDiseaseDetail');
     bindChoiceToggle('allergyChoice', 'drugAllergyDetail');
     bindChoiceToggle('medsChoice', 'regularMedsDetail');
+    bindOtherDetail('referralSource', 'referralSourceDetail');
+    bindOtherDetail('mainReason', 'mainReasonDetail');
 
     validatePattern(document.getElementById('idNumber'), /^(\d{13}|[A-Za-z0-9]{6,12})$/, 'err-idNumber');
     validatePattern(document.getElementById('phone'), /^0\d{8,9}$/, 'err-phone');
@@ -1124,6 +1186,13 @@ header img {
       if (!isValidEmailOrDash(email)) {
         showStatus(STR.msgInvalidEmail[LANG], 'error');
         document.getElementById('email').focus();
+        return;
+      }
+
+      var referralSource = checkedValues('referralSource', 'referralSourceDetail');
+      if (!referralSource) {
+        showStatus(STR.msgNeedReferral[LANG], 'error');
+        document.querySelector('input[name="referralSource"]').focus();
         return;
       }
 
@@ -1171,8 +1240,8 @@ header img {
         emergencyName: document.getElementById('emergencyName').value,
         emergencyPhone: document.getElementById('emergencyPhone').value,
         emergencyRelation: document.getElementById('emergencyRelation').value,
-        referralSource: document.getElementById('referralSource').value,
-        mainReason: document.getElementById('mainReason').value,
+        referralSource: referralSource,
+        mainReason: checkedValues('mainReason', 'mainReasonDetail'),
         consentTreatment: document.getElementById('consentTreatment').checked,
         consentMarketing: marketingChoice,
         signatureName: signatureName

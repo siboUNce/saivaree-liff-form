@@ -360,6 +360,7 @@ header img {
         <label><span data-i18n="dob">วันเกิด</span> <span class="req">*</span></label>
         <input type="date" id="dob" required>
         <div class="hint" data-i18n="dobHint">รูปแบบวันที่: วัน/เดือน/ปี</div>
+        <div class="hint" id="dob-preview" aria-live="polite"></div>
 
         <label><span data-i18n="sex">เพศ</span> <span class="req">*</span></label>
         <div class="radio-row">
@@ -624,6 +625,8 @@ header img {
     msgNeedMarketingChoice: { th: 'กรุณาเลือกยินยอม/ไม่ยินยอม สำหรับการรับข่าวสารและแจ้งเตือนนัดหมาย', en: 'Please select your preference for receiving news/appointment reminders.' },
     msgNeedSignature: { th: 'กรุณาพิมพ์ชื่อ-นามสกุลเพื่อยืนยันการยินยอม', en: 'Please type your full name to confirm consent.' },
     msgNeedNickname: { th: 'กรุณากรอกชื่อเล่นหรือชื่อที่ต้องการให้เรียก', en: 'Please enter a nickname or preferred name.' },
+    msgInvalidDob: { th: 'ปีเกิดไม่ถูกต้อง กรุณาเลือกวันเกิดใหม่', en: 'The birth year looks wrong. Please pick your date of birth again.' },
+    msgConfirmInfantDob: { th: 'วันเกิดที่เลือกคืออายุยังไม่ถึง 1 ปี ถูกต้องไหม?\nถ้าไม่ใช่ กด ยกเลิก แล้วเลือกปีเกิดใหม่', en: 'This date of birth means under 1 year old. Is that right?\nIf not, press Cancel and pick the year again.' },
     msgNeedEmail: { th: 'กรุณากรอกอีเมล หากไม่มีให้กรอก -', en: 'Please enter an email, or - if none.' },
     msgInvalidEmail: { th: 'กรุณากรอกอีเมลให้ถูกต้อง หรือกรอก - หากไม่มีอีเมล', en: 'Please enter a valid email, or - if none.' },
     msgGenericError: { th: 'เกิดข้อผิดพลาด กรุณาลองใหม่', en: 'An error occurred. Please try again.' },
@@ -856,7 +859,13 @@ header img {
       payload.hn = hn;
     } else {
       var phone = document.getElementById('link-phone').value;
-      var birthdate = document.getElementById('link-birthdate').value;
+      var birthdateInput = document.getElementById('link-birthdate');
+      if (birthdateInput.value && !fixBirthdateInput(birthdateInput, null)) {
+        showLinkMessage(STR.msgInvalidDob[LANG]);
+        birthdateInput.focus();
+        return;
+      }
+      var birthdate = birthdateInput.value;
       if (!phone.trim() || !birthdate) {
         showLinkMessage(STR.msgLinkRequired[LANG]);
         if (!phone.trim()) document.getElementById('link-phone').focus();
@@ -1003,6 +1012,61 @@ header img {
         input.setCustomValidity('');
       }
     });
+  }
+
+  // A phone set to the Buddhist calendar shows years in B.E. in the date
+  // picker. Someone who scrolls to their C.E. year there (e.g. 1975) sends
+  // 1975 - 543 = 1432. Nobody alive was born before 1900, so a year that
+  // lands back in a plausible range after adding 543 is that mistake.
+  var THAI_MONTHS = ['มกราคม', 'กุมภาพันธ์', 'มีนาคม', 'เมษายน', 'พฤษภาคม', 'มิถุนายน',
+    'กรกฎาคม', 'สิงหาคม', 'กันยายน', 'ตุลาคม', 'พฤศจิกายน', 'ธันวาคม'];
+
+  function isRealIsoDate(y, m, d) {
+    var date = new Date(Date.UTC(y, m - 1, d));
+    return date.getUTCFullYear() === y && date.getUTCMonth() === m - 1 && date.getUTCDate() === d;
+  }
+
+  // Returns the corrected ISO date, '' for empty, or null when the date is unusable.
+  function normalizeBirthdate(iso) {
+    var match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(String(iso || ''));
+    if (!match) return iso ? null : '';
+    var y = Number(match[1]), m = Number(match[2]), d = Number(match[3]);
+    var thisYear = new Date().getFullYear();
+    if (y < 1900 && y + 543 >= 1900 && y + 543 <= thisYear) {
+      y += 543;
+    }
+    if (y < 1900 || y > thisYear || !isRealIsoDate(y, m, d)) return null;
+    var today = new Date();
+    var todayIso = today.getFullYear() + '-' + String(today.getMonth() + 1).padStart(2, '0') +
+      '-' + String(today.getDate()).padStart(2, '0');
+    var fixed = y + '-' + match[2] + '-' + match[3];
+    return fixed > todayIso ? null : fixed;
+  }
+
+  function ageInYears(iso) {
+    var p = iso.split('-');
+    var y = Number(p[0]), m = Number(p[1]), d = Number(p[2]);
+    var now = new Date();
+    var age = now.getFullYear() - y;
+    if (now.getMonth() + 1 < m || (now.getMonth() + 1 === m && now.getDate() < d)) age--;
+    return age;
+  }
+
+  function describeBirthdate(iso) {
+    var p = iso.split('-');
+    var y = Number(p[0]), m = Number(p[1]), d = Number(p[2]);
+    var age = ageInYears(iso);
+    if (LANG === 'en') return 'Date of birth: ' + d + '/' + m + '/' + y + ' (age ' + age + ')';
+    return 'วันเกิด: ' + d + ' ' + THAI_MONTHS[m - 1] + ' พ.ศ. ' + (y + 543) +
+      ' (ค.ศ. ' + y + ') อายุ ' + age + ' ปี';
+  }
+
+  // Fixes the input in place; returns false when the date cannot be used.
+  function fixBirthdateInput(input, previewEl) {
+    var fixed = normalizeBirthdate(input.value);
+    if (fixed && fixed !== input.value) input.value = fixed;
+    if (previewEl) previewEl.textContent = fixed ? describeBirthdate(fixed) : '';
+    return fixed !== null;
   }
 
   function isValidEmailOrDash(value) {
@@ -1159,6 +1223,13 @@ header img {
     validatePattern(document.getElementById('emergencyPhone'), /^0\d{8,9}$/, 'err-emergencyPhone');
     validatePattern(document.getElementById('email'), /^(-|[^\s@]+@[^\s@]+\.[^\s@]+)$/, 'err-email');
 
+    document.getElementById('dob').addEventListener('change', function (e) {
+      fixBirthdateInput(e.target, document.getElementById('dob-preview'));
+    });
+    document.getElementById('link-birthdate').addEventListener('change', function (e) {
+      fixBirthdateInput(e.target, null);
+    });
+
     document.getElementById('patient-form').addEventListener('submit', function (e) {
       e.preventDefault();
 
@@ -1174,6 +1245,19 @@ header img {
       if (!nickname) {
         showStatus(STR.msgNeedNickname[LANG], 'error');
         document.getElementById('nickname').focus();
+        return;
+      }
+
+      var dobInput = document.getElementById('dob');
+      if (!dobInput.value || !fixBirthdateInput(dobInput, document.getElementById('dob-preview'))) {
+        showStatus(STR.msgInvalidDob[LANG], 'error');
+        dobInput.focus();
+        return;
+      }
+      // The picker opens on the current year; a birth date this recent is
+      // usually a year that was never changed.
+      if (ageInYears(dobInput.value) < 1 && !window.confirm(STR.msgConfirmInfantDob[LANG])) {
+        dobInput.focus();
         return;
       }
 

@@ -620,6 +620,9 @@ header img {
     signatureLabel: { th: 'พิมพ์ชื่อ-นามสกุลเพื่อยืนยันการยินยอม (e-signature)', en: 'Type your full name to confirm consent (e-signature)' },
     submitBtn: { th: 'ส่งข้อมูลลงทะเบียน', en: 'Submit Registration' },
     submitting: { th: 'กำลังส่งข้อมูล...', en: 'Submitting...' },
+    submittingRetry: { th: 'กำลังส่งข้อมูลอีกครั้ง...', en: 'Sending again...' },
+    resendBtn: { th: 'ส่งอีกครั้ง', en: 'Send again' },
+    msgSubmitRetryable: { th: 'ส่งข้อมูลไม่สำเร็จ กรุณาตรวจสอบอินเทอร์เน็ต แล้วกด “ส่งอีกครั้ง” (ข้อมูลจะไม่ถูกบันทึกซ้ำ) หากยังไม่ได้ กรุณาแจ้งเจ้าหน้าที่', en: 'Could not send. Check your connection and tap “Send again” (it will not be saved twice). If it still fails, please tell the clinic staff.' },
     msgSuccess: { th: 'ลงทะเบียนสำเร็จ ขอบคุณค่ะ', en: 'Registration successful. Thank you.' },
     msgNeedTreatmentConsent: { th: 'ต้องกดยินยอมตามนโยบาย PDPA (ข้อแรก) ก่อนส่งฟอร์ม', en: 'You must agree to the PDPA consent (first item) before submitting.' },
     msgNeedMarketingChoice: { th: 'กรุณาเลือกยินยอม/ไม่ยินยอม สำหรับการรับข่าวสารและแจ้งเตือนนัดหมาย', en: 'Please select your preference for receiving news/appointment reminders.' },
@@ -754,6 +757,107 @@ header img {
       clearTimeout(timeoutId);
     });
   }
+
+  // ---- registration send ----
+  // Sending the same registration again is safe: the server answers a registration it
+  // already saved (same LINE account, phone and birthdate) with the same HN.
+  var SUBMIT_TIMEOUT_MS = 45000;
+  var SUBMIT_RETRY_DELAYS_MS = [2000, 5000];
+
+  function wait(ms) {
+    return new Promise(function (resolve) { setTimeout(resolve, ms); });
+  }
+
+  // One POST. Resolves with the server's JSON answer; rejects when there is no readable
+  // answer (network error, timeout, or a page that is not JSON).
+  function postRegistration(data) {
+    var controller = typeof AbortController !== 'undefined' ? new AbortController() : null;
+    var timeoutId = setTimeout(function () {
+      if (controller) controller.abort();
+    }, SUBMIT_TIMEOUT_MS);
+
+    return fetch(WEB_APP_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      body: JSON.stringify(data),
+      signal: controller ? controller.signal : undefined
+    }).then(function (res) {
+      return res.text().then(function (text) {
+        try {
+          return JSON.parse(text);
+        } catch (parseError) {
+          var page = String(text || '').replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim();
+          throw new Error('HTTP ' + res.status + ' not JSON: ' + page.slice(0, 100));
+        }
+      });
+    }).finally(function () {
+      clearTimeout(timeoutId);
+    });
+  }
+
+  // Asks whether the registration reached the sheet. Resolves with an ok result, or null
+  // when it is not there or the question itself failed.
+  function checkRegistrationSaved(data) {
+    return postMyAccount({
+      action: 'registration_status',
+      accessToken: data.accessToken,
+      phone: data.phone,
+      birthdate: data.dobIso
+    }).then(function (result) {
+      var hn = result && result.ok === true && result.data && result.data.saved === true && result.data.hn;
+      return hn ? { status: 'ok', hn: hn, accountLinkPending: true } : null;
+    }, function () {
+      return null;
+    });
+  }
+
+  // Sends the registration. On an unreadable answer it asks whether the row was saved,
+  // and sends again if not. A JSON answer from the server (ok, existing patient, or a
+  // validation error) is returned as it is. Rejects when every attempt failed.
+  function sendRegistration(data, onRetry) {
+    var attempt = 0;
+    var lastError = null;
+
+    function tryOnce() {
+      return postRegistration(data)
+        .then(function (result) {
+          // The web app answers a GET this way: a redirect dropped the POST body,
+          // so nothing was saved.
+          if (result && result.code === 'POST_EXPECTED') {
+            throw new Error('POST_EXPECTED');
+          }
+          return result;
+        })
+        .catch(function (err) {
+          lastError = err;
+          return err && err.message === 'POST_EXPECTED' ? null : checkRegistrationSaved(data);
+        })
+        .then(function (result) {
+          if (result) return result;
+          if (attempt >= SUBMIT_RETRY_DELAYS_MS.length) {
+            throw lastError || new Error('no answer');
+          }
+          return wait(SUBMIT_RETRY_DELAYS_MS[attempt++]).then(function () {
+            if (onRetry) onRetry(attempt + 1);
+            return tryOnce();
+          });
+        });
+    }
+
+    return tryOnce();
+  }
+
+  // Best effort: tells the clinic a patient could not send. Only the technical error
+  // goes out, never the form contents.
+  function reportRegistrationProblem(accessToken, err) {
+    postMyAccount({
+      action: 'registration_problem',
+      accessToken: accessToken,
+      stage: 'submit',
+      detail: String(err && err.message ? err.message : err).slice(0, 160)
+    }).catch(function () {});
+  }
+  // ---- end registration send ----
 
   function renderMyAccount(account) {
     pendingLinkToken = '';
@@ -1336,34 +1440,9 @@ header img {
       btn.textContent = STR.submitting[LANG];
       showStatus('', '');
 
-      fetch(WEB_APP_URL, {
-        method: 'POST',
-        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-        body: JSON.stringify(data)
+      sendRegistration(data, function () {
+        btn.textContent = STR.submittingRetry[LANG];
       })
-        .then(function (res) { return res.json(); })
-        .catch(function (err) {
-          // The registration may have been saved even if its response was lost.
-          // Resolve once using the submitted proof; never repeat registration.
-          return postMyAccount({
-            action: 'my_account_resolve',
-            accessToken: data.accessToken,
-            phone: data.phone,
-            birthdate: data.dobIso
-          }).then(function (result) {
-            var recovered = result && result.ok === true && result.data;
-            var patient = recovered && recovered.linked === true &&
-              recovered.account && recovered.account.patient;
-            var candidate = recovered && recovered.linked === false &&
-              recovered.link_token && recovered.candidate;
-            var hn = patient ? patient.hn : (candidate ? candidate.hn : '');
-            if ((typeof hn === 'string' && hn.trim()) ||
-                (typeof hn === 'number' && isFinite(hn) && hn > 0)) {
-              return { status: 'ok', hn: hn, accountLinked: recovered.linked === true };
-            }
-            throw err;
-          });
-        })
         .then(function (result) {
           if (result && result.status === 'existing_patient') {
             submitInProgress = false;
@@ -1422,10 +1501,14 @@ header img {
           }
         })
         .catch(function (err) {
-          btn.disabled = true;
-          btn.textContent = 'กรุณาแจ้งเจ้าหน้าที่';
-          showStatus('ไม่สามารถยืนยันผลการส่งได้ กรุณาแจ้งเจ้าหน้าที่ตรวจสอบใน Google Sheet ก่อนส่งซ้ำ', 'error');
+          // Every attempt failed and the sheet does not have the row. Sending again is
+          // safe, so leave the patient a working button instead of a dead end.
           console.error('Submit error:', err);
+          reportRegistrationProblem(data.accessToken, err);
+          submitInProgress = false;
+          btn.disabled = false;
+          btn.textContent = STR.resendBtn[LANG];
+          showStatus(STR.msgSubmitRetryable[LANG], 'error');
         });
     });
 

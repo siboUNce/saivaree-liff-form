@@ -207,6 +207,7 @@ header img {
     margin-top: 12px;
     padding: 10px;
     border-radius: 8px;
+    white-space: pre-line;
   }
   #status-msg.success { background: #e6f4ea; color: #1e7e34; }
   #status-msg.error { background: #fdecea; color: var(--error); }
@@ -226,8 +227,6 @@ header img {
   }
   .course-remaining { color: var(--accent-dark); white-space: nowrap; }
   .empty-state { margin: 0; color: #666; font-size: 14px; }
-  .proof-mode { margin: 14px 0; }
-  .proof-mode label { cursor: pointer; }
   .account-action, .secondary-btn, .back-btn {
     width: 100%;
     padding: 13px;
@@ -288,6 +287,7 @@ header img {
       <h2 data-i18n="myAccountTitle">ข้อมูลของฉัน</h2>
       <p id="account-name" class="account-name"></p>
       <p id="account-hn" class="account-detail hidden"><strong data-i18n="hnLabel">HN</strong> <span id="account-hn-value"></span></p>
+      <p id="account-nickname-row" class="account-detail hidden"><strong data-i18n="nicknameLabel">ชื่อเล่น</strong> <span id="account-nickname"></span></p>
       <p class="account-detail"><strong data-i18n="depositLabel">ยอดเงินมัดจำ</strong> <span id="account-deposit"></span></p>
       <h2 data-i18n="coursesTitle">คอร์ส / สิทธิ์ที่เหลือ</h2>
       <ul id="account-courses" class="account-courses"></ul>
@@ -298,20 +298,13 @@ header img {
       <h2 data-i18n="linkTitle">เชื่อมข้อมูลคนไข้</h2>
       <p class="account-copy" data-i18n="linkIntro">หากเคยเป็นคนไข้แล้ว เชื่อมบัญชีเพื่อดู HN ยอดเงินมัดจำ และคอร์สหรือสิทธิ์ที่เหลือ</p>
       <form id="account-link-form">
-        <div class="radio-row proof-mode">
-          <label><input type="radio" name="linkProof" value="hn" checked> <span data-i18n="proofHn">HN</span></label>
-          <label><input type="radio" name="linkProof" value="phone"> <span data-i18n="proofPhoneDob">เบอร์โทร + วันเกิด</span></label>
-        </div>
-        <div id="link-by-hn">
-          <label for="link-hn"><span data-i18n="hnLabel">HN</span> <span class="req">*</span></label>
-          <input type="text" id="link-hn" autocomplete="off">
-        </div>
-        <div id="link-by-phone" class="hidden">
+        <div id="link-by-phone">
           <label for="link-phone"><span data-i18n="phone">เบอร์ติดต่อ</span> <span class="req">*</span></label>
-          <input type="tel" id="link-phone" autocomplete="tel">
+          <input type="tel" id="link-phone" autocomplete="tel" required>
           <label for="link-birthdate"><span data-i18n="dob">วันเกิด</span> <span class="req">*</span></label>
-          <input type="date" id="link-birthdate">
+          <input type="date" id="link-birthdate" required>
         </div>
+        <p class="hint" data-i18n="linkStaffHint">เปลี่ยนเบอร์โทรแล้ว หรือหาประวัติไม่เจอ กรุณาแจ้งเจ้าหน้าที่ให้เชื่อมบัญชีให้</p>
         <button type="submit" id="account-link-submit" class="account-action" data-i18n="linkSubmit">ค้นหาประวัติของฉัน</button>
         <p id="account-link-message" class="account-message hidden" role="alert"></p>
       </form>
@@ -323,6 +316,7 @@ header img {
       <p class="account-copy" data-i18n="confirmIntro">ตรวจสอบข้อมูลก่อนเชื่อมบัญชี LINE กับประวัติคนไข้เดิม</p>
       <p id="account-confirm-name" class="account-name"></p>
       <p id="account-confirm-hn-row" class="account-detail hidden"><strong data-i18n="hnLabel">HN</strong> <span id="account-confirm-hn"></span></p>
+      <p id="account-confirm-nickname-row" class="account-detail hidden"><strong data-i18n="nicknameLabel">ชื่อเล่น</strong> <span id="account-confirm-nickname"></span></p>
       <p id="account-confirm-phone-row" class="account-detail hidden"><strong data-i18n="phone">เบอร์ติดต่อ</strong> <span id="account-confirm-phone"></span></p>
       <p class="account-copy" data-i18n="confirmQuestion">นี่คือข้อมูลของคุณหรือไม่?</p>
       <button type="button" id="account-confirm-yes" class="account-action" data-i18n="confirmYes">ยืนยัน</button>
@@ -638,13 +632,13 @@ header img {
     accountLoading: { th: 'กำลังโหลดข้อมูลของฉัน...', en: 'Loading my information...' },
     myAccountTitle: { th: 'ข้อมูลของฉัน', en: 'My Account' },
     hnLabel: { th: 'HN', en: 'HN' },
+    nicknameLabel: { th: 'ชื่อเล่น', en: 'Nickname' },
+    linkStaffHint: { th: 'เปลี่ยนเบอร์โทรแล้ว หรือหาประวัติไม่เจอ กรุณาแจ้งเจ้าหน้าที่ให้เชื่อมบัญชีให้', en: 'Changed your phone number, or cannot find your record? Please ask the clinic staff to link your account.' },
     depositLabel: { th: 'ยอดเงินมัดจำ', en: 'Deposit balance' },
     coursesTitle: { th: 'คอร์ส / สิทธิ์ที่เหลือ', en: 'Remaining courses / benefits' },
     coursesEmpty: { th: 'ยังไม่มีคอร์สหรือสิทธิ์คงเหลือ', en: 'There are no remaining courses or benefits.' },
     linkTitle: { th: 'เชื่อมข้อมูลคนไข้', en: 'Link your patient account' },
     linkIntro: { th: 'หากเคยเป็นคนไข้แล้ว เชื่อมบัญชีเพื่อดู HN ยอดเงินมัดจำ และคอร์สหรือสิทธิ์ที่เหลือ', en: 'If you are an existing patient, link your account to see your HN, deposit balance, and remaining courses or benefits.' },
-    proofHn: { th: 'HN', en: 'HN' },
-    proofPhoneDob: { th: 'เบอร์โทร + วันเกิด', en: 'Phone + date of birth' },
     linkSubmit: { th: 'ค้นหาประวัติของฉัน', en: 'Find my patient record' },
     linking: { th: 'กำลังค้นหาประวัติ...', en: 'Finding your patient record...' },
     confirmTitle: { th: 'ยืนยันข้อมูลคนไข้', en: 'Confirm patient record' },
@@ -715,14 +709,19 @@ header img {
     el.className = 'account-message hidden';
   }
 
-  function setLinkProofMode(mode) {
-    var byHn = mode === 'hn';
-    document.getElementById('link-by-hn').classList.toggle('hidden', !byHn);
-    document.getElementById('link-by-phone').classList.toggle('hidden', byHn);
-    document.getElementById('link-hn').required = byHn;
-    document.getElementById('link-phone').required = !byHn;
-    document.getElementById('link-birthdate').required = !byHn;
-    clearLinkMessage();
+  // A patient registered before names were stored separately has only
+  // display_name (the Odoo name without HN).
+  function patientFullName(patient) {
+    var parts = [patient.first_name, patient.last_name].filter(function (part) {
+      return typeof part === 'string' && part.trim();
+    });
+    return parts.length ? parts.join(' ') : (patient.display_name || '');
+  }
+
+  function showOptionalRow(rowId, valueId, value) {
+    var text = typeof value === 'string' ? value.trim() : '';
+    document.getElementById(valueId).textContent = text;
+    document.getElementById(rowId).classList.toggle('hidden', !text);
   }
 
   function accountFailureMessage(result, isLink) {
@@ -868,9 +867,10 @@ header img {
     var depositText = (deposit.currency_symbol || '') + (deposit.balance == null ? '0.00' : deposit.balance);
     if (deposit.currency_code) depositText += ' ' + deposit.currency_code;
 
-    document.getElementById('account-name').textContent = patient.display_name || '—';
+    document.getElementById('account-name').textContent = patientFullName(patient) || '—';
     document.getElementById('account-hn-value').textContent = hn || '';
     document.getElementById('account-hn').classList.toggle('hidden', !hn || hn === false);
+    showOptionalRow('account-nickname-row', 'account-nickname', patient.nickname);
     document.getElementById('account-deposit').textContent = depositText;
 
     var courseList = document.getElementById('account-courses');
@@ -934,11 +934,13 @@ header img {
 
   function renderLinkConfirmation(candidate, linkToken) {
     pendingLinkToken = linkToken || '';
-    document.getElementById('account-confirm-name').textContent = candidate.display_name || '—';
+    // Before linking the server masks the name; HN and nickname are shown as they are.
+    document.getElementById('account-confirm-name').textContent = candidate.masked_name || '—';
 
     var hn = candidate.hn || '';
     document.getElementById('account-confirm-hn').textContent = hn;
     document.getElementById('account-confirm-hn-row').classList.toggle('hidden', !hn);
+    showOptionalRow('account-confirm-nickname-row', 'account-confirm-nickname', candidate.nickname);
 
     var maskedPhone = candidate.masked_phone || '';
     document.getElementById('account-confirm-phone').textContent = maskedPhone;
@@ -951,34 +953,24 @@ header img {
   function submitAccountLink() {
     if (accountLinkInProgress) return;
 
-    var proof = radioValue('linkProof');
+    // Phone + birthdate is the only proof: an HN alone is easy to guess.
     var payload = { action: 'my_account_resolve' };
-    if (proof === 'hn') {
-      var hn = document.getElementById('link-hn').value;
-      if (!hn.trim()) {
-        showLinkMessage(STR.msgLinkRequired[LANG]);
-        document.getElementById('link-hn').focus();
-        return;
-      }
-      payload.hn = hn;
-    } else {
-      var phone = document.getElementById('link-phone').value;
-      var birthdateInput = document.getElementById('link-birthdate');
-      if (birthdateInput.value && !fixBirthdateInput(birthdateInput, null)) {
-        showLinkMessage(STR.msgInvalidDob[LANG]);
-        birthdateInput.focus();
-        return;
-      }
-      var birthdate = birthdateInput.value;
-      if (!phone.trim() || !birthdate) {
-        showLinkMessage(STR.msgLinkRequired[LANG]);
-        if (!phone.trim()) document.getElementById('link-phone').focus();
-        else document.getElementById('link-birthdate').focus();
-        return;
-      }
-      payload.phone = phone;
-      payload.birthdate = birthdate;
+    var phone = document.getElementById('link-phone').value;
+    var birthdateInput = document.getElementById('link-birthdate');
+    if (birthdateInput.value && !fixBirthdateInput(birthdateInput, null)) {
+      showLinkMessage(STR.msgInvalidDob[LANG]);
+      birthdateInput.focus();
+      return;
     }
+    var birthdate = birthdateInput.value;
+    if (!phone.trim() || !birthdate) {
+      showLinkMessage(STR.msgLinkRequired[LANG]);
+      if (!phone.trim()) document.getElementById('link-phone').focus();
+      else document.getElementById('link-birthdate').focus();
+      return;
+    }
+    payload.phone = phone;
+    payload.birthdate = birthdate;
 
     var token = typeof liff !== 'undefined' && liff.getAccessToken ? liff.getAccessToken() : '';
     if (!token) {
@@ -1219,6 +1211,19 @@ header img {
     return LANG === 'en' ? 'None' : 'ไม่มี';
   }
 
+  // "HN 690174 · ชื่อ นามสกุล (ชื่อเล่น)": the HN from the server, the names as typed.
+  function registeredPatientText(hn, data) {
+    var name = [data.firstName, data.lastName].map(function (part) {
+      return String(part || '').trim();
+    }).filter(Boolean).join(' ');
+    var nickname = String(data.nickname || '').trim();
+    var parts = [];
+    if (hn) parts.push('HN ' + hn);
+    if (name) parts.push(name + (nickname ? ' (' + nickname + ')' : ''));
+    else if (nickname) parts.push(nickname);
+    return parts.join(' · ');
+  }
+
   function resetSubmitButton(btn) {
     btn.disabled = false;
     btn.textContent = STR.submitBtn[LANG];
@@ -1287,9 +1292,6 @@ header img {
     document.getElementById('btn-lang-th').addEventListener('click', function () { applyLang('th'); });
     document.getElementById('btn-lang-en').addEventListener('click', function () { applyLang('en'); });
 
-    document.querySelectorAll('input[name="linkProof"]').forEach(function (radio) {
-      radio.addEventListener('change', function () { setLinkProofMode(radio.value); });
-    });
     document.getElementById('account-link-form').addEventListener('submit', function (e) {
       e.preventDefault();
       submitAccountLink();
@@ -1314,7 +1316,6 @@ header img {
       accountStatusStarted = false;
       checkMyAccountStatus();
     });
-    setLinkProofMode('hn');
 
     bindChoiceToggle('chronicChoice', 'chronicDiseaseDetail');
     bindChoiceToggle('allergyChoice', 'drugAllergyDetail');
@@ -1459,7 +1460,8 @@ header img {
             return;
           }
           if (result && result.status === 'ok') {
-            var successMsg = STR.msgSuccess[LANG] + (result.hn ? ' (HN: ' + result.hn + ')' : '');
+            var whoText = registeredPatientText(result.hn, data);
+            var successMsg = STR.msgSuccess[LANG] + (whoText ? '\n' + whoText : '');
             if (result.accountLinked !== true && result.accountLinkPending !== true) {
               successMsg += ' ' + STR.msgRegistrationLinkPending[LANG];
             }
@@ -1471,8 +1473,8 @@ header img {
 
             if (typeof liff !== 'undefined' && liff.isInClient && liff.isInClient()) {
               var pushText = LANG === 'en' ? '✓ Registration completed' : '✓ ลงทะเบียนคนไข้ใหม่เรียบร้อยแล้วค่ะ';
-              if (result.hn) {
-                pushText += ' (HN: ' + result.hn + ')';
+              if (whoText) {
+                pushText += '\n' + whoText;
               }
 
               liff.sendMessages([

@@ -225,6 +225,20 @@ header img {
     font-size: 14px;
   }
   .course-remaining { color: var(--accent-dark); white-space: nowrap; }
+  .points-card {
+    margin: 4px 0 18px; padding: 16px; border-radius: 14px; color: #fff;
+    background: linear-gradient(140deg, #c9ab72 0%, #9a7b45 60%, #6e5426 100%);
+  }
+  .points-head { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; }
+  .points-tier { font-size: 13px; padding: 2px 10px; border: 1px solid rgba(255,255,255,.6); border-radius: 999px; }
+  .points-value { font-size: 34px; font-weight: 700; line-height: 1.1; }
+  .points-value small { font-size: 14px; font-weight: 400; margin-left: 4px; }
+  .points-coupon { margin-top: 12px; padding: 10px 12px; border-radius: 10px; background: rgba(255,255,255,.18); font-size: 14px; }
+  .points-coupon strong { display: block; }
+  .points-sub { margin: 14px 0 6px; font-size: 14px; color: var(--accent-dark); font-weight: 600; }
+  .reward-ok { color: #1e7e34; }
+  .history-plus { color: #1e7e34; white-space: nowrap; }
+  .history-minus { color: var(--error); white-space: nowrap; }
   .empty-state { margin: 0; color: #666; font-size: 14px; }
   .proof-mode { margin: 14px 0; }
   .proof-mode label { cursor: pointer; }
@@ -287,8 +301,28 @@ header img {
     <section id="account-summary" class="section hidden" aria-live="polite">
       <h2 data-i18n="myAccountTitle">ข้อมูลของฉัน</h2>
       <p id="account-name" class="account-name"></p>
+      <p id="account-nickname" class="account-detail hidden"><strong data-i18n="nicknameLabel">ชื่อเล่น</strong> <span id="account-nickname-value"></span></p>
       <p id="account-hn" class="account-detail hidden"><strong data-i18n="hnLabel">HN</strong> <span id="account-hn-value"></span></p>
       <p class="account-detail"><strong data-i18n="depositLabel">ยอดเงินมัดจำ</strong> <span id="account-deposit"></span></p>
+      <div id="account-points" class="hidden">
+        <div class="points-card">
+          <div class="points-head">
+            <span data-i18n="pointsLabel">แต้มสะสม</span>
+            <span id="points-tier" class="points-tier hidden"></span>
+          </div>
+          <div class="points-value"><span id="points-value">0</span><small data-i18n="pointsUnit">แต้ม</small></div>
+          <div id="points-coupon" class="points-coupon hidden">
+            <strong data-i18n="birthdayCoupon">🎂 คูปองวันเกิดเดือนนี้</strong>
+            <span id="points-coupon-name"></span>
+            <div><span data-i18n="validUntil">ใช้ได้ถึง</span> <span id="points-coupon-until"></span></div>
+          </div>
+        </div>
+        <p class="points-sub" data-i18n="rewardsTitle">ของรางวัลแลกแต้ม</p>
+        <ul id="points-rewards" class="account-courses"></ul>
+        <p class="points-sub hidden" id="points-history-title" data-i18n="historyTitle">ความเคลื่อนไหวล่าสุด</p>
+        <ul id="points-history" class="account-courses"></ul>
+        <p class="empty-state" style="margin:10px 0 18px" data-i18n="pointsHint">แจ้งพนักงานที่เคาน์เตอร์เพื่อแลกของรางวัลหรือใช้คูปอง</p>
+      </div>
       <h2 data-i18n="coursesTitle">คอร์ส / สิทธิ์ที่เหลือ</h2>
       <ul id="account-courses" class="account-courses"></ul>
       <p id="account-courses-empty" class="empty-state hidden" data-i18n="coursesEmpty">ยังไม่มีคอร์สหรือสิทธิ์คงเหลือ</p>
@@ -638,9 +672,17 @@ header img {
     accountLoading: { th: 'กำลังโหลดข้อมูลของฉัน...', en: 'Loading my information...' },
     myAccountTitle: { th: 'ข้อมูลของฉัน', en: 'My Account' },
     hnLabel: { th: 'HN', en: 'HN' },
+    nicknameLabel: { th: 'ชื่อเล่น', en: 'Nickname' },
     depositLabel: { th: 'ยอดเงินมัดจำ', en: 'Deposit balance' },
     coursesTitle: { th: 'คอร์ส / สิทธิ์ที่เหลือ', en: 'Remaining courses / benefits' },
     coursesEmpty: { th: 'ยังไม่มีคอร์สหรือสิทธิ์คงเหลือ', en: 'There are no remaining courses or benefits.' },
+    pointsLabel: { th: 'แต้มสะสม', en: 'Points' },
+    pointsUnit: { th: 'แต้ม', en: 'pts' },
+    birthdayCoupon: { th: '🎂 คูปองวันเกิดเดือนนี้', en: '🎂 Birthday coupon this month' },
+    validUntil: { th: 'ใช้ได้ถึง', en: 'Valid until' },
+    rewardsTitle: { th: 'ของรางวัลแลกแต้ม', en: 'Rewards' },
+    historyTitle: { th: 'ความเคลื่อนไหวล่าสุด', en: 'Recent activity' },
+    pointsHint: { th: 'แจ้งพนักงานที่เคาน์เตอร์เพื่อแลกของรางวัลหรือใช้คูปอง', en: 'Ask our staff at the counter to redeem a reward or use your coupon.' },
     linkTitle: { th: 'เชื่อมข้อมูลคนไข้', en: 'Link your patient account' },
     linkIntro: { th: 'หากเคยเป็นคนไข้แล้ว เชื่อมบัญชีเพื่อดู HN ยอดเงินมัดจำ และคอร์สหรือสิทธิ์ที่เหลือ', en: 'If you are an existing patient, link your account to see your HN, deposit balance, and remaining courses or benefits.' },
     proofHn: { th: 'HN', en: 'HN' },
@@ -868,7 +910,9 @@ header img {
     var depositText = (deposit.currency_symbol || '') + (deposit.balance == null ? '0.00' : deposit.balance);
     if (deposit.currency_code) depositText += ' ' + deposit.currency_code;
 
-    document.getElementById('account-name').textContent = patient.display_name || '—';
+    document.getElementById('account-name').textContent = patient.full_name || patient.display_name || '—';
+    document.getElementById('account-nickname-value').textContent = patient.nickname || '';
+    document.getElementById('account-nickname').classList.toggle('hidden', !patient.nickname);
     document.getElementById('account-hn-value').textContent = hn || '';
     document.getElementById('account-hn').classList.toggle('hidden', !hn || hn === false);
     document.getElementById('account-deposit').textContent = depositText;
@@ -887,7 +931,59 @@ header img {
       courseList.appendChild(item);
     });
     document.getElementById('account-courses-empty').classList.toggle('hidden', courses.length !== 0);
+    renderPoints(account && account.membership);
     showAccountView('account-summary');
+  }
+
+  function formatThaiDate(iso) {
+    var parts = String(iso || '').split('-');
+    if (parts.length !== 3) return iso || '';
+    return Number(parts[2]) + '/' + Number(parts[1]) + '/' + (Number(parts[0]) + (LANG === 'th' ? 543 : 0));
+  }
+
+  function pointsRow(left, right, rightClass) {
+    var item = document.createElement('li');
+    var a = document.createElement('span');
+    var b = document.createElement('span');
+    a.textContent = left;
+    b.textContent = right;
+    b.className = rightClass || 'course-remaining';
+    item.appendChild(a);
+    item.appendChild(b);
+    return item;
+  }
+
+  function renderPoints(membership) {
+    var box = document.getElementById('account-points');
+    box.classList.toggle('hidden', !membership);
+    if (!membership) return;
+    var unit = STR.pointsUnit[LANG];
+    var points = Number(membership.points) || 0;
+    document.getElementById('points-value').textContent = points.toLocaleString();
+    var tier = document.getElementById('points-tier');
+    tier.textContent = membership.tier || '';
+    tier.classList.toggle('hidden', !membership.tier);
+
+    var coupon = membership.birthday_coupon;
+    document.getElementById('points-coupon').classList.toggle('hidden', !coupon);
+    document.getElementById('points-coupon-name').textContent = coupon ? coupon.name || '' : '';
+    document.getElementById('points-coupon-until').textContent = coupon ? formatThaiDate(coupon.valid_until) : '';
+
+    var rewards = document.getElementById('points-rewards');
+    rewards.textContent = '';
+    (Array.isArray(membership.rewards) ? membership.rewards : []).forEach(function (reward) {
+      var need = Number(reward.points) || 0;
+      rewards.appendChild(pointsRow(reward.name || '', need + ' ' + unit, points >= need ? 'reward-ok' : 'course-remaining'));
+    });
+
+    var history = document.getElementById('points-history');
+    var rows = Array.isArray(membership.activity) ? membership.activity : [];
+    history.textContent = '';
+    rows.forEach(function (row) {
+      var n = Number(row.points) || 0;
+      history.appendChild(pointsRow(formatThaiDate(row.date) + ' · ' + (row.label || ''), (n > 0 ? '+' : '') + n, n > 0 ? 'history-plus' : 'history-minus'));
+    });
+    document.getElementById('points-history-title').classList.toggle('hidden', rows.length === 0);
   }
 
   function checkMyAccountStatus() {

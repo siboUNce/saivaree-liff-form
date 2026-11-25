@@ -301,6 +301,7 @@ header img {
     <section id="account-summary" class="section hidden" aria-live="polite">
       <h2 data-i18n="myAccountTitle">ข้อมูลของฉัน</h2>
       <p id="account-name" class="account-name"></p>
+      <p id="account-nickname" class="account-detail hidden"><strong data-i18n="nicknameLabel">ชื่อเล่น</strong> <span id="account-nickname-value"></span></p>
       <p id="account-hn" class="account-detail hidden"><strong data-i18n="hnLabel">HN</strong> <span id="account-hn-value"></span></p>
       <p class="account-detail"><strong data-i18n="depositLabel">ยอดเงินมัดจำ</strong> <span id="account-deposit"></span></p>
       <div id="account-points" class="hidden">
@@ -671,6 +672,7 @@ header img {
     accountLoading: { th: 'กำลังโหลดข้อมูลของฉัน...', en: 'Loading my information...' },
     myAccountTitle: { th: 'ข้อมูลของฉัน', en: 'My Account' },
     hnLabel: { th: 'HN', en: 'HN' },
+    nicknameLabel: { th: 'ชื่อเล่น', en: 'Nickname' },
     depositLabel: { th: 'ยอดเงินมัดจำ', en: 'Deposit balance' },
     coursesTitle: { th: 'คอร์ส / สิทธิ์ที่เหลือ', en: 'Remaining courses / benefits' },
     coursesEmpty: { th: 'ยังไม่มีคอร์สหรือสิทธิ์คงเหลือ', en: 'There are no remaining courses or benefits.' },
@@ -908,7 +910,9 @@ header img {
     var depositText = (deposit.currency_symbol || '') + (deposit.balance == null ? '0.00' : deposit.balance);
     if (deposit.currency_code) depositText += ' ' + deposit.currency_code;
 
-    document.getElementById('account-name').textContent = patient.display_name || '—';
+    document.getElementById('account-name').textContent = patient.full_name || patient.display_name || '—';
+    document.getElementById('account-nickname-value').textContent = patient.nickname || '';
+    document.getElementById('account-nickname').classList.toggle('hidden', !patient.nickname);
     document.getElementById('account-hn-value').textContent = hn || '';
     document.getElementById('account-hn').classList.toggle('hidden', !hn || hn === false);
     document.getElementById('account-deposit').textContent = depositText;
